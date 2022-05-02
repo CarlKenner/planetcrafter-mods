@@ -21,7 +21,7 @@ internal sealed class InstallModHandler : Handler<InstallModCommand>
         {
             var sourcePath = command.Mod ?? Environment.CurrentDirectory;
             var assemblyFile = Directory.Exists(sourcePath)
-                ? InstallUtil.FindFirstAndOnlyAssemblySourcePath(sourcePath)
+                ? InstallUtil.FindOneAndOnlyAssembly(sourcePath)
                 : Path.GetFullPath(sourcePath);
             var settings = new InstallPackage(assemblyFile,
                 Path.GetFileName(assemblyFile),

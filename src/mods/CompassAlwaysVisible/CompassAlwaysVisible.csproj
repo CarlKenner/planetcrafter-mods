@@ -3,48 +3,21 @@
     <TargetFramework>net462</TargetFramework>
     <AssemblyName>Doublestop.CompassAlwaysVisible</AssemblyName>
     <RootNamespace>Doublestop.CompassAlwaysVisible</RootNamespace>
-    <Version>0.0.1</Version>
+    <Version>0.0.2</Version>
     <LangVersion>7.3</LangVersion>
     <Platforms>AnyCPU</Platforms>
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
 
-  <PropertyGroup Condition="Exists('c:\Program Files (x86)\Steam\steamapps\common\The Planet Crafter')">
-    <GameDir>c:\Program Files (x86)\Steam\steamapps\common\The Planet Crafter\</GameDir>
-    <GameManaged>$(GameDir)Planet Crafter_Data\Managed\</GameManaged>
-    <PluginsFolder>$(GameDir)\BepInEx\plugins</PluginsFolder>
-  </PropertyGroup>
-  <PropertyGroup Condition="Exists('d:\Games\Steam\steamapps\common\The Planet Crafter')">
-    <GameDir>d:\Games\Steam\steamapps\common\The Planet Crafter\</GameDir>
-    <GameManaged>$(GameDir)Planet Crafter_Data\Managed\</GameManaged>
-    <PluginsFolder>$(GameDir)\BepInEx\plugins</PluginsFolder>
-  </PropertyGroup>
+  <!-- This is all that is needed to pull in the necessary basic dependencies. -->
+  <Import Project="..\build\mod-build-props.xml"></Import>
 
+  <!-- Additional dependencies are still handled the usual way on a per-project basis. -->
   <ItemGroup>
-    <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
-    <PackageReference Include="BepInEx.Core" Version="5.*" />
-    <PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
-    <PackageReference Include="UnityEngine.Modules" Version="2020.3.26" IncludeAssets="compile" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Assembly-CSharp">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(GameManaged)\Assembly-CSharp.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="UnityEngine.UI">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(GameManaged)unityengine.ui.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
-
-  <Target Name="CopyDLLs" AfterTargets="Build">
-    <Copy SourceFiles="$(TargetDir)$(AssemblyName).dll" DestinationFolder="$(PluginsFolder)\" />
-  </Target>
 </Project>

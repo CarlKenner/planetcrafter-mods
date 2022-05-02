@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using BepInEx;
 using HarmonyLib;
 using SpaceCraft;
@@ -16,7 +15,7 @@ namespace Doublestop.RotatedCompass
         public const string PluginName = "Doublestop's Rotated Compass";
 
         // Make sure the project's <Version/> attr is in sync with PluginVersion
-        public const string PluginVersion = "0.0.1";
+        public const string PluginVersion = "0.0.2";
 
         #endregion
 
@@ -40,8 +39,9 @@ namespace Doublestop.RotatedCompass
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(CanvasCompass), "Update")]
-        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        // ReSharper disable InconsistentNaming
         static void CanvasCompass_Update_Postfix(CanvasCompass __instance, GameObject ___player)
+        // ReSharper restore InconsistentNaming
         {
             // Injects a -90 degree y-rotation offset into the original calculation,
             // which shifts the compass labels clockwise one position from default.

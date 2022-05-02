@@ -1,16 +1,15 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using BepInEx.Configuration;
 
 namespace Doublestop.RotatedCompass
 {
-    [SuppressMessage("ReSharper", "InconsistentNaming")]
     internal sealed class PluginConfig
     {
         #region Fields
 
         const string ConfigSection = "General";
 
+        // ReSharper disable once InconsistentNaming
         const string IAmTheNorthStarDesc =
             "Set to true if you are the courageous sort who follows no one, not even directions.";
 
@@ -37,6 +36,7 @@ namespace Doublestop.RotatedCompass
             throw new InvalidOperationException(
                 $"Need to call {nameof(PluginConfig)}.{nameof(Initialize)} first.");
 
+        // ReSharper disable once InconsistentNaming
         public bool IAmTheNorthStar => _iAmTheNorthStar.Value;
 
         #endregion

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using BepInEx;
 using HarmonyLib;
 using SpaceCraft;
@@ -16,7 +15,7 @@ namespace Doublestop.CompassAlwaysVisible
         public const string PluginName = "Doublestop's Compass Always Visible";
 
         // Make sure the project's <Version/> attr is in sync with PluginVersion
-        public const string PluginVersion = "0.0.1";
+        public const string PluginVersion = "0.0.2";
 
         #endregion
 
@@ -38,7 +37,7 @@ namespace Doublestop.CompassAlwaysVisible
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(CanvasCompass), "SetActive")]
-        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        // ReSharper disable once InconsistentNaming
         static void CanvasCompass_SetActive_Postfix(RawImage ___compass)
         {
             if (!___compass.gameObject.activeInHierarchy)
