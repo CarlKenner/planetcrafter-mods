@@ -14,11 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Mods", "Mods", "{0F7EA0C6-0
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{72D95B13-B843-4920-9FD2-F021E90D0C1B}"
 EndProject
-<<<<<<< HEAD
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CompassAlwaysVisible", "src\mods\CompassAlwaysVisible\CompassAlwaysVisible.csproj", "{CE78D3C2-79F0-4F93-87CF-10B986DF1B2D}"
-=======
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CompassAtStart", "src\mods\CompassAlwaysVisible\CompassAlwaysVisible.csproj", "{CE78D3C2-79F0-4F93-87CF-10B986DF1B2D}"
->>>>>>> @{-1}
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tpc", "src\tools\tpc\tpc.csproj", "{E1F59F7A-ECCD-49BA-845B-064D940D1FCD}"
 EndProject

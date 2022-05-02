@@ -20,7 +20,7 @@ namespace Thangs.CompassAlwaysVisible
 
         #endregion
 
-        #region Private Methodsm
+        #region Private Methods
 
         void Awake()
         {
@@ -37,15 +37,9 @@ namespace Thangs.CompassAlwaysVisible
         }
 
         [HarmonyPostfix]
-<<<<<<< HEAD:src/mods/CompassAlwaysVisible/Plugin.cs
-        [HarmonyPatch(typeof(CanvasCompass), "SetStatus")]
-        [SuppressMessage("ReSharper", "InconsistentNaming")]
-        static void CanvasCompass_SetStatus_Postfix(RawImage ___compass)
-=======
         [HarmonyPatch(typeof(CanvasCompass), "SetActive")]
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         static void CanvasCompass_SetActive_Postfix(RawImage ___compass)
->>>>>>> @{-1}:src/mods/CompassAtStart/Plugin.cs
         {
             if (!___compass.gameObject.activeInHierarchy)
                 ___compass.gameObject.SetActive(true);
