@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace Thangs.Tpc.Mods;
+namespace Doublestop.Tpc.Mods;
 
 [DebuggerDisplay("{TargetAssemblyFileName} <= {SourceAssemblyPath}")]
 public sealed class InstallPackage

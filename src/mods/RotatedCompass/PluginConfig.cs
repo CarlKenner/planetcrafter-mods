@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using BepInEx.Configuration;
 
-namespace Thangs.RotatedCompass
+namespace Doublestop.RotatedCompass
 {
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     internal sealed class PluginConfig

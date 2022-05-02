@@ -5,15 +5,15 @@ using HarmonyLib;
 using SpaceCraft;
 using UnityEngine.UI;
 
-namespace Thangs.CompassAlwaysVisible
+namespace Doublestop.CompassAlwaysVisible
 {
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     public sealed class Plugin : BaseUnityPlugin
     {
         #region Fields
 
-        public const string PluginGuid = "Thangs.CompassAlwaysVisible";
-        public const string PluginName = "Thangs Compass Always Visible";
+        public const string PluginGuid = "Doublestop.CompassAlwaysVisible";
+        public const string PluginName = "Doublestop's Compass Always Visible";
 
         // Make sure the project's <Version/> attr is in sync with PluginVersion
         public const string PluginVersion = "0.0.1";

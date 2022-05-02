@@ -1,9 +1,9 @@
 ﻿using System.CommandLine.Invocation;
+using Doublestop.Tpc.Commands;
+using Doublestop.Tpc.Mods;
 using Somethangs.Extensions.CommandLine;
-using Thangs.Tpc.Commands;
-using Thangs.Tpc.Mods;
 
-namespace Thangs.Tpc.Handlers;
+namespace Doublestop.Tpc.Handlers;
 
 // ReSharper disable once UnusedType.Global
 internal sealed class InstallModHandler : Handler<InstallModCommand>

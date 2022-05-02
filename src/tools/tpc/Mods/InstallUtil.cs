@@ -1,4 +1,4 @@
-﻿namespace Thangs.Tpc.Mods;
+﻿namespace Doublestop.Tpc.Mods;
 
 internal static class InstallUtil
 {

@@ -1,4 +1,4 @@
-﻿namespace Thangs.Tpc.Internal;
+﻿namespace Doublestop.Tpc.Internal;
 
 internal static class CollectionExtensions
 {

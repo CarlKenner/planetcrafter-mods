@@ -1,7 +1,8 @@
 ﻿using Somethangs.Extensions.CommandLine.Attributes;
+
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 
-namespace Thangs.Tpc.Commands;
+namespace Doublestop.Tpc.Commands;
 
 [Command(Name="install")]
 internal sealed class InstallModCommand

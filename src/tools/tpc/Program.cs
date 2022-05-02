@@ -1,10 +1,10 @@
 ﻿using System.CommandLine.Builder;
 using System.CommandLine.Parsing;
+using Doublestop.Tpc;
+using Doublestop.Tpc.Commands;
+using Doublestop.Tpc.Config;
+using Doublestop.Tpc.Handlers;
 using Somethangs.Extensions.CommandLine;
-using Thangs.Tpc;
-using Thangs.Tpc.Commands;
-using Thangs.Tpc.Config;
-using Thangs.Tpc.Handlers;
 
 return await new CommandLineBuilder(CommandUtil.CreateRootCommand<TpcOpts>())
     .UseDefaults()

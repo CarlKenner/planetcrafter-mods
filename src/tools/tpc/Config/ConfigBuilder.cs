@@ -1,6 +1,4 @@
-﻿using Thangs.Tpc.Commands;
-
-namespace Thangs.Tpc.Config;
+﻿namespace Doublestop.Tpc.Config;
 
 internal sealed class ConfigBuilder
 {

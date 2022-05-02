@@ -1,8 +1,8 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics;
-using Thangs.Tpc.Internal;
+using Doublestop.Tpc.Internal;
 
-namespace Thangs.Tpc.Config;
+namespace Doublestop.Tpc.Config;
 
 [DebuggerDisplay("Count = {_values.Count}")]
 internal sealed class TpcConfig

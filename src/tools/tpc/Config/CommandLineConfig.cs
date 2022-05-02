@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 
-namespace Thangs.Tpc.Config;
+namespace Doublestop.Tpc.Config;
 
 internal sealed class CommandLineConfig : IEnumerable<KeyValuePair<string, string>>
 {

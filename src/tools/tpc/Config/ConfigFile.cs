@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using Thangs.Tpc.Internal;
+using Doublestop.Tpc.Internal;
 
-namespace Thangs.Tpc.Config;
+namespace Doublestop.Tpc.Config;
 
 internal static class ConfigFile
 {

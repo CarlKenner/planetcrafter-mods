@@ -5,15 +5,15 @@ using HarmonyLib;
 using SpaceCraft;
 using UnityEngine;
 
-namespace Thangs.RotatedCompass
+namespace Doublestop.RotatedCompass
 {
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     public sealed class Plugin : BaseUnityPlugin
     {
         #region Fields
 
-        public const string PluginGuid = "Thangs.RotatedCompass";
-        public const string PluginName = "Thangs Rotated Compass";
+        public const string PluginGuid = "Doublestop.RotatedCompass";
+        public const string PluginName = "Doublestop's Rotated Compass";
 
         // Make sure the project's <Version/> attr is in sync with PluginVersion
         public const string PluginVersion = "0.0.1";

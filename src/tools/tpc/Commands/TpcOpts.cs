@@ -1,6 +1,6 @@
 ﻿using Somethangs.Extensions.CommandLine.Attributes;
 
-namespace Thangs.Tpc.Commands;
+namespace Doublestop.Tpc.Commands;
 
 internal sealed class TpcOpts
 {

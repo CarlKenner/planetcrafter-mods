@@ -1,4 +1,4 @@
-﻿namespace Thangs.Tpc;
+﻿namespace Doublestop.Tpc;
 
 internal sealed class Steam
 {

@@ -1,4 +1,4 @@
-﻿namespace Thangs.Tpc.Config;
+﻿namespace Doublestop.Tpc.Config;
 
 internal static class ConfigKeys
 {

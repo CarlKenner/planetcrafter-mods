@@ -1,6 +1,6 @@
-﻿using Thangs.Tpc.Mods;
+﻿using Doublestop.Tpc.Mods;
 
-namespace Thangs.Tpc;
+namespace Doublestop.Tpc;
 
 internal sealed class PlanetCrafterGame
 {

@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 
-namespace Thangs.Tpc.Mods;
+namespace Doublestop.Tpc.Mods;
 
 public sealed class Installer : Collection<InstallStep>
 {

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Immutable;
 
-namespace Thangs.Tpc.Config;
+namespace Doublestop.Tpc.Config;
 
 internal static class ConfigDefaults
 {

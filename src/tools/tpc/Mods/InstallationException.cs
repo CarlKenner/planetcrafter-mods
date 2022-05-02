@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace Thangs.Tpc.Mods;
+namespace Doublestop.Tpc.Mods;
 
 [Serializable]
 public class InstallationException : ApplicationException
