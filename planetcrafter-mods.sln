@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32228.430
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{06D12D15-C7CE-4705-B190-76DCD71AF25B}"
+	ProjectSection(SolutionItems) = preProject
+		readme.md = readme.md
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RotatedCompass", "src\mods\RotatedCompass\RotatedCompass.csproj", "{4D215134-93E3-48B5-A4C7-8B5AE5F5801C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Mods", "Mods", "{0F7EA0C6-02F2-496C-BBBD-38201E822CFE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{72D95B13-B843-4920-9FD2-F021E90D0C1B}"
+EndProject
+<<<<<<< HEAD
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CompassAlwaysVisible", "src\mods\CompassAlwaysVisible\CompassAlwaysVisible.csproj", "{CE78D3C2-79F0-4F93-87CF-10B986DF1B2D}"
+=======
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CompassAtStart", "src\mods\CompassAlwaysVisible\CompassAlwaysVisible.csproj", "{CE78D3C2-79F0-4F93-87CF-10B986DF1B2D}"
+>>>>>>> @{-1}
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tpc", "src\tools\tpc\tpc.csproj", "{E1F59F7A-ECCD-49BA-845B-064D940D1FCD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4D215134-93E3-48B5-A4C7-8B5AE5F5801C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D215134-93E3-48B5-A4C7-8B5AE5F5801C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D215134-93E3-48B5-A4C7-8B5AE5F5801C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D215134-93E3-48B5-A4C7-8B5AE5F5801C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE78D3C2-79F0-4F93-87CF-10B986DF1B2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE78D3C2-79F0-4F93-87CF-10B986DF1B2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE78D3C2-79F0-4F93-87CF-10B986DF1B2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE78D3C2-79F0-4F93-87CF-10B986DF1B2D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1F59F7A-ECCD-49BA-845B-064D940D1FCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1F59F7A-ECCD-49BA-845B-064D940D1FCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1F59F7A-ECCD-49BA-845B-064D940D1FCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1F59F7A-ECCD-49BA-845B-064D940D1FCD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4D215134-93E3-48B5-A4C7-8B5AE5F5801C} = {0F7EA0C6-02F2-496C-BBBD-38201E822CFE}
+		{CE78D3C2-79F0-4F93-87CF-10B986DF1B2D} = {0F7EA0C6-02F2-496C-BBBD-38201E822CFE}
+		{E1F59F7A-ECCD-49BA-845B-064D940D1FCD} = {72D95B13-B843-4920-9FD2-F021E90D0C1B}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D9AE1A4E-9C1A-4E27-93F4-0F5C0DA51C18}
+	EndGlobalSection
+EndGlobal
