@@ -28,7 +28,7 @@ internal sealed class ListPluginsHandler : Handler<ListPluginsCommand>
 
     #region Public Methods
 
-    public override async Task HandleAsync(ListPluginsCommand command, InvocationContext context, CancellationToken cancel)
+    public override async ValueTask HandleAsync(ListPluginsCommand command, InvocationContext context, CancellationToken cancel)
     {
         var totalPluginCount = await _game.Plugins.CountAsync(cancel);
         var plugins = await GetAllLocalPluginsAsync(command, cancel);

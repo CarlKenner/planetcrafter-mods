@@ -1,4 +1,5 @@
-﻿using System.CommandLine.Invocation;
+﻿using System.CommandLine;
+using System.CommandLine.Invocation;
 using Doublestop.Tpc.Commands;
 using Somethangs.Extensions.CommandLine;
 
@@ -23,7 +24,7 @@ internal sealed class RemovePluginHandler : Handler<RemovePluginCommand>
 
     #region Public Methods
 
-    public override async Task HandleAsync(RemovePluginCommand command, InvocationContext context, CancellationToken cancel)
+    public override async ValueTask HandleAsync(RemovePluginCommand command, InvocationContext context, CancellationToken cancel)
     {
         var plugin = await _game.Plugins.GetAsync(command.Plugin, cancel);
         if (plugin is null)

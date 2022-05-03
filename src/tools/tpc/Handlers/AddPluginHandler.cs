@@ -1,4 +1,5 @@
-﻿using System.CommandLine.Invocation;
+﻿using System.CommandLine;
+using System.CommandLine.Invocation;
 using Doublestop.Tpc.Commands;
 using Doublestop.Tpc.Plugins.Installing;
 using Somethangs.Extensions.CommandLine;
@@ -24,7 +25,7 @@ internal sealed class AddPluginHandler : Handler<AddPluginCommand>
 
     #region Public Methods
 
-    public override async Task HandleAsync(AddPluginCommand command, InvocationContext context, CancellationToken cancel)
+    public override async ValueTask HandleAsync(AddPluginCommand command, InvocationContext context, CancellationToken cancel)
     {
         var sourcePath = command.Plugin ?? Environment.CurrentDirectory;
         var package = Directory.Exists(sourcePath)

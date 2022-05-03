@@ -7,6 +7,5 @@ return await new CommandLineBuilder(CommandUtil.CreateRootCommand<ProgramOpts>()
     .ConfigureDependencies()
     .AddCommandHandlers()
     .UseDefaults()
-    .UseSimpleExceptionErrorReporting()
     .Build()
     .InvokeAsync(Environment.CommandLine);
