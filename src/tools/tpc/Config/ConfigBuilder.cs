@@ -2,11 +2,17 @@
 
 internal sealed class ConfigBuilder
 {
+    #region Fields
+
     readonly Dictionary<string, string> _values = new(StringComparer.OrdinalIgnoreCase);
+
+    #endregion
+
+    #region Public Methods
 
     public ConfigBuilder AddDefaults()
     {
-        ConfigDefaults.Apply(_values);
+        ConfigDefaults.Set(_values);
         return this;
     }
 
@@ -25,8 +31,8 @@ internal sealed class ConfigBuilder
     public ConfigBuilder AddValues(IEnumerable<KeyValuePair<string, string>> values)
     {
         if (values == null) throw new ArgumentNullException(nameof(values));
-        foreach (var pair in values)
-            _values[pair.Key] = pair.Value;
+        foreach (var (key, value) in values.Where(p => !string.IsNullOrWhiteSpace(p.Value)))
+            _values[key] = value;
         return this;
     }
 
@@ -51,4 +57,6 @@ internal sealed class ConfigBuilder
     }
 
     public TpcConfig Build() => new(_values);
+
+    #endregion
 }

@@ -4,14 +4,22 @@ namespace Doublestop.Tpc.Config;
 
 internal static class ConfigDefaults
 {
+    #region Fields
+
     static readonly IReadOnlyDictionary<string, string> Defaults = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
     {
         { ConfigKeys.GameDir, "" }
     }.ToImmutableDictionary();
 
-    public static void Apply(IDictionary<string, string> values)
+    #endregion
+
+    #region Public Methods
+
+    public static void Set(IDictionary<string, string> values)
     {
         foreach (var (key, value) in Defaults) 
             values[key] = value;
     }
+
+    #endregion
 }

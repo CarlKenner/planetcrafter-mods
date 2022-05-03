@@ -7,15 +7,15 @@ using UnityEngine.UI;
 namespace Doublestop.CompassAlwaysVisible
 {
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
-    public sealed class Plugin : BaseUnityPlugin
+    internal sealed class Plugin : BaseUnityPlugin
     {
         #region Fields
 
-        public const string PluginGuid = "Doublestop.CompassAlwaysVisible";
-        public const string PluginName = "Doublestop's Compass Always Visible";
+        const string PluginGuid = "Doublestop.CompassAlwaysVisible";
+        const string PluginName = "Doublestop's Compass Always Visible";
 
         // Make sure the project's <Version/> attr is in sync with PluginVersion
-        public const string PluginVersion = "0.0.2";
+        const string PluginVersion = "0.0.2";
 
         #endregion
 
@@ -36,13 +36,14 @@ namespace Doublestop.CompassAlwaysVisible
         }
 
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(CanvasCompass), "SetActive")]
-        // ReSharper disable once InconsistentNaming
-        static void CanvasCompass_SetActive_Postfix(RawImage ___compass)
+        [HarmonyPatch(typeof(CanvasCompass), "SetStatus")]
+        // ReSharper disable InconsistentNaming
+        static void CanvasCompass_SetStatus_Postfix(RawImage ___compass)
         {
             if (!___compass.gameObject.activeInHierarchy)
                 ___compass.gameObject.SetActive(true);
         }
+        // ReSharper restore InconsistentNaming
 
         #endregion
     }

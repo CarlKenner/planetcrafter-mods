@@ -7,6 +7,14 @@
       "commandName": "Project",
       "commandLineArgs": "install ..\\..\\..\\..\\..\\..\\..\\mods\\CompassAtStart\\bin\\Debug\\net462"
     },
+    "tpc remove": {
+      "commandName": "Project",
+      "commandLineArgs": "remove doublestop.rotatedcompass.dll"
+    },
+    "tpc ls": {
+      "commandName": "Project",
+      "commandLineArgs": "ls"
+    },
     "WSL": {
       "commandName": "WSL2",
       "environmentVariables": {},
