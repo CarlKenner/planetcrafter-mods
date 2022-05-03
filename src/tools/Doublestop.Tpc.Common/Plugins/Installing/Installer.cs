@@ -31,10 +31,10 @@ public sealed class Installer
             await step.InstallAsync(package, cancel);
     }
 
-    public async ValueTask RemoveAsync(string assemblyFileName, CancellationToken cancel)
+    public async ValueTask RemoveAsync(InstalledPlugin plugin, CancellationToken cancel)
     {
         foreach (var step in _components)
-            await step.RemoveAsync(assemblyFileName, cancel);
+            await step.RemoveAsync(plugin, cancel);
     }
 
     #endregion

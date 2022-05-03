@@ -57,12 +57,9 @@ public sealed class LocalPlugins
     public async ValueTask<SearchPluginsResult> SearchAsync(SearchPluginsRequest? request, CancellationToken cancel)
     {
         request ??= SearchPluginsRequest.Empty;
-        var allAssemblies = await GetAllPluginsAsync(cancel);
-        var totalCount = allAssemblies
-            .Select(a => a.Plugins.Count)
-            .DefaultIfEmpty(0)
-            .Sum();
-        var filteredList = ApplySearchFilters(request, allAssemblies).ToList();
+        var allPlugins = await GetAllPluginsAsync(cancel);
+        var totalCount = allPlugins.Count;
+        var filteredList = ApplySearchFilters(request, allPlugins).ToList();
         var matchedCount = filteredList.Count;
         return new SearchPluginsResult(totalCount, matchedCount, filteredList);
     }
@@ -74,7 +71,7 @@ public sealed class LocalPlugins
     /// <param name="cancel"></param>
     /// <returns></returns>
     /// <exception cref="FileNotFoundException"></exception>
-    public async ValueTask<PluginAssembly> AddAsync(PluginPackage package, CancellationToken cancel)
+    public async ValueTask<InstalledPlugin> AddAsync(PluginPackage package, CancellationToken cancel)
     {
         var installer = new Installer(_game.BepInEx.PluginsDirectory.FullName);
         await installer.InstallAsync(package, cancel);
@@ -82,25 +79,57 @@ public sealed class LocalPlugins
                throw new FileNotFoundException($"Plugin {package.TargetAssemblyFileName} was not found after installation.");
     }
 
-    /// <summary>
-    /// Removes an installed plugin.
-    /// </summary>
-    /// <param name="assemblyFileName"></param>
-    /// <param name="cancel"></param>
-    /// <returns></returns>
-    public async ValueTask RemoveAsync(string assemblyFileName, CancellationToken cancel)
+    /// <inheritdoc cref="RemoveAsync"/>
+    public async ValueTask<bool> RemoveByGuidAsync(string pluginGuid, CancellationToken cancel)
     {
-        var installer = new Installer(_game.BepInEx.PluginsDirectory.FullName);
-        await installer.RemoveAsync(assemblyFileName, cancel);
+        var plugin = await GetAsync(pluginGuid, cancel);
+        if (plugin is null || !plugin.Exists)
+            return false;
+
+        return await RemoveAsync(plugin, cancel);
     }
 
     /// <summary>
-    /// 
+    /// Removes an installed plugin.
     /// </summary>
-    /// <param name="assemblyFileName"></param>
+    /// <param name="plugin"></param>
     /// <param name="cancel"></param>
     /// <returns></returns>
-    public async ValueTask<PluginAssembly?> GetAsync(string assemblyFileName, CancellationToken cancel)
+    public async Task<bool> RemoveAsync(InstalledPlugin plugin, CancellationToken cancel)
+    {
+        if (plugin == null) throw new ArgumentNullException(nameof(plugin));
+        if (!plugin.Exists)
+            return false;
+
+        var installer = new Installer(_game.BepInEx.PluginsDirectory.FullName);
+        await installer.RemoveAsync(plugin, cancel);
+        return true;
+    }
+
+    /// <summary>
+    /// Returns the plugin with the specified guid.
+    /// </summary>
+    /// <param name="pluginGuid"></param>
+    /// <param name="cancel"></param>
+    /// <returns></returns>
+    public async ValueTask<InstalledPlugin?> GetAsync(string pluginGuid, CancellationToken cancel) =>
+        (await GetAllPluginsAsync(cancel)).FirstOrDefault(plugin => string.Equals(
+            plugin.Guid.Trim(),
+            pluginGuid.Trim(),
+            StringComparison.OrdinalIgnoreCase));
+
+    #endregion
+
+    #region Private Methods
+
+    async ValueTask<IReadOnlyList<InstalledPlugin>> GetAllPluginsAsync(CancellationToken cancel)
+    {
+        var tasks = PluginFiles.Select(async f => await ReadPluginAssemblyAsync(f.Name, cancel));
+        var assemblies = await Task.WhenAll(tasks);
+        return FlattenAssembliesToPlugins(assemblies.WhereNotNull()).ToImmutableList();
+    }
+
+    async ValueTask<PluginAssembly?> ReadPluginAssemblyAsync(string assemblyFileName, CancellationToken cancel)
     {
         return await Task.Run(() =>
         {
@@ -146,21 +175,8 @@ public sealed class LocalPlugins
         #endregion
     }
 
-    #endregion
-
-    #region Private Methods
-
-    async ValueTask<IReadOnlyList<PluginAssembly>> GetAllPluginsAsync(CancellationToken cancel)
+    static IEnumerable<InstalledPlugin> ApplySearchFilters(SearchPluginsRequest request, IEnumerable<InstalledPlugin> plugins)
     {
-        var tasks = PluginFiles.Select(async f => await GetAsync(f.Name, cancel));
-        var assemblies = await Task.WhenAll(tasks);
-        return assemblies.WhereNotNull().ToImmutableList();
-    }
-
-    static IEnumerable<InstalledPlugin> ApplySearchFilters(SearchPluginsRequest request, IEnumerable<PluginAssembly> allAssemblies)
-    {
-        var plugins = FlattenAssembliesToPlugins(allAssemblies);
-
         // Search terms
         if (request.SearchTerms.Any())
         {
@@ -169,8 +185,8 @@ public sealed class LocalPlugins
                 var regexList = request.SearchTerms.Distinct().Select(s => new Regex(s, RegexOptions.IgnoreCase)).ToArray();
                 if (request.MatchAllTerms)
                     plugins = plugins.Where(p => regexList.All(r =>
-                    r.IsMatch(p.Name) ||
-                    r.IsMatch(p.AssemblyFile.Name)));
+                        r.IsMatch(p.Name) ||
+                        r.IsMatch(p.AssemblyFile.Name)));
                 else
                     plugins = plugins.Where(p => regexList.Any(r =>
                         r.IsMatch(p.Name) ||

@@ -6,7 +6,7 @@ internal abstract class InstallerComponent
 
     public abstract ValueTask InstallAsync(PluginPackage package, CancellationToken cancel);
 
-    public abstract ValueTask RemoveAsync(string assemblyFileName, CancellationToken cancel);
+    public abstract ValueTask RemoveAsync(InstalledPlugin plugin, CancellationToken cancel);
 
     #endregion
 }

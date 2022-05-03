@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel;
-using Somethangs.Extensions.CommandLine.Attributes;
+using Doublestop.Extensions.CommandLine.Attributes;
 
 namespace Doublestop.Tpc.Commands;
 

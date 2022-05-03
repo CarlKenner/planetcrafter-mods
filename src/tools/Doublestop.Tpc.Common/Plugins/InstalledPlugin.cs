@@ -58,6 +58,8 @@ public sealed class InstalledPlugin
     /// </summary>
     public DirectoryInfo AssetsDirectory { get; }
 
+    public bool Exists => AssemblyFile.Exists;
+
     #endregion
 
     #region Public Methods

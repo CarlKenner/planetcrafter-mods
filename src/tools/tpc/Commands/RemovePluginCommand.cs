@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Somethangs.Extensions.CommandLine.Attributes;
+using Doublestop.Extensions.CommandLine.Attributes;
 
 namespace Doublestop.Tpc.Commands;
 
@@ -8,7 +8,7 @@ internal sealed class RemovePluginCommand
 {
     #region Properties
 
-    [Arg(Description = "Plugin filename, with extension.")]
+    [Arg(Description = "Plugin guid. Run the 'ls' command to see a list of guids for the plugins you have installed.")]
     [Required]
     public string Plugin { get; init; } = "";
 

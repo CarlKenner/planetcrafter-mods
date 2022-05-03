@@ -23,8 +23,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="Somethangs.Extensions.CommandLine">
-      <HintPath>Lib\Somethangs.Extensions.CommandLine.dll</HintPath>
+    <Reference Include="Doublestop.Extensions.CommandLine">
+      <HintPath>Lib\Doublestop.Extensions.CommandLine.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

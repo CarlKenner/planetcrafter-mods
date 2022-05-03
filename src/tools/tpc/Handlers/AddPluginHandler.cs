@@ -2,7 +2,7 @@
 using System.CommandLine.Invocation;
 using Doublestop.Tpc.Commands;
 using Doublestop.Tpc.Plugins.Installing;
-using Somethangs.Extensions.CommandLine;
+using Doublestop.Extensions.CommandLine;
 
 namespace Doublestop.Tpc.Handlers;
 
@@ -32,7 +32,7 @@ internal sealed class AddPluginHandler : Handler<AddPluginCommand>
             ? PluginPackage.CreateFromDirectory(sourcePath, command.TargetFilename)
             : PluginPackage.CreateFromFile(sourcePath, command.TargetFilename);
         var plugin = await _game.Plugins.AddAsync(package, cancel);
-        context.Console.WriteLine($"Installed {Path.GetFileName(package.SourceAssemblyPath)} to {plugin.AssemblyPath}.");
+        context.Console.WriteLine($"Installed {Path.GetFileName(package.SourceAssemblyPath)} to {plugin.AssemblyFile.FullName}.");
     }
 
     #endregion

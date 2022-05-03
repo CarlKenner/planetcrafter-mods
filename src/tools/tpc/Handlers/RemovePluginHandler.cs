@@ -1,7 +1,7 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Invocation;
 using Doublestop.Tpc.Commands;
-using Somethangs.Extensions.CommandLine;
+using Doublestop.Extensions.CommandLine;
 
 namespace Doublestop.Tpc.Handlers;
 
@@ -30,11 +30,11 @@ internal sealed class RemovePluginHandler : Handler<RemovePluginCommand>
         if (plugin is null)
             throw new FileNotFoundException($"Plugin not found: {command.Plugin}");
 
-        await _game.Plugins.RemoveAsync(plugin.AssemblyPath, cancel);
+        await _game.Plugins.RemoveByGuidAsync(plugin.Guid, cancel);
         if (plugin.Exists)
-            context.Console.WriteLine($"Removed {plugin.AssemblyFileName}, but the plugin appears to still exist in {_game.BepInEx.PluginsDirectory}.");
+            context.Console.WriteLine($"Removed {plugin.Name}, but the plugin file appears to still exist at {plugin.AssemblyFile.FullName}. It may be locked. Is the game running?");
         else
-            context.Console.WriteLine($"Removed {plugin.AssemblyFileName}.");
+            context.Console.WriteLine($"Removed {plugin.Name}.");
     }
 
     #endregion

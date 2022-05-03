@@ -1,4 +1,4 @@
-﻿using Somethangs.Extensions.CommandLine.Attributes;
+﻿using Doublestop.Extensions.CommandLine.Attributes;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 
