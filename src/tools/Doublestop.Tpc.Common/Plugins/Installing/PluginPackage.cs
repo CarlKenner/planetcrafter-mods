@@ -2,6 +2,9 @@
 
 namespace Doublestop.Tpc.Plugins.Installing;
 
+
+
+
 [DebuggerDisplay("{TargetAssemblyFileName} <= {SourceAssemblyPath}")]
 public sealed class PluginPackage
 {

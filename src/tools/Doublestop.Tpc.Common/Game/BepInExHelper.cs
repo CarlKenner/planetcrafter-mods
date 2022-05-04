@@ -1,4 +1,4 @@
-﻿namespace Doublestop.Tpc;
+﻿namespace Doublestop.Tpc.Game;
 
 public sealed class BepInExHelper
 {
@@ -29,8 +29,21 @@ public sealed class BepInExHelper
     public DirectoryInfo CoreDirectory { get; }
     public DirectoryInfo PluginsDirectory { get; }
 
-    public IEnumerable<FileInfo> CoreDlls =>
-        CoreDirectory.EnumerateFiles("*.dll", SearchOption.TopDirectoryOnly);
+    /// <summary>
+    /// Enumerates <c>dll</c> files in the <see cref="CoreDirectory"/>.
+    /// </summary>
+    public IEnumerable<string> CoreDlls =>
+        CoreDirectory
+            .EnumerateFiles("*.dll", SearchOption.TopDirectoryOnly)
+            .Select(f => f.FullName);
+
+    /// <summary>
+    /// Enumerates <c>dll</c> files in the <see cref="PluginsDirectory"/>.
+    /// </summary>
+    public IEnumerable<string> PluginDlls =>
+        PluginsDirectory
+            .EnumerateFiles("*.dll", SearchOption.TopDirectoryOnly)
+            .Select(f => f.FullName);
 
     #endregion
 

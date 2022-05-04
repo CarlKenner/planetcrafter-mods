@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.CommandLine.Rendering;
 using System.CommandLine.Rendering.Views;
 using Doublestop.Tpc.Plugins;
 
@@ -9,13 +8,13 @@ internal sealed class PluginDetailView : StackLayoutView
 {
     #region Constructors
 
-    public PluginDetailView(InstalledPlugin plugin, bool showAssets = false)
+    public PluginDetailView(Plugin plugin, bool showAssets = false)
     {
         if (plugin == null) throw new ArgumentNullException(nameof(plugin));
 
         AddLine(plugin.Name);
         AddLine(new string('-', plugin.Name.Length));
-        AddLine($"File:    {plugin.AssemblyFile.Name}");
+        AddLine($"File:    {plugin.File.Name}");
         AddLine($"Guid:    {plugin.Guid}");
         AddLine($"Version: {plugin.Version}");
         AddLine("");

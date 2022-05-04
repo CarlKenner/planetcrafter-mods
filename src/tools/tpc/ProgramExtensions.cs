@@ -21,21 +21,22 @@ public static class ProgramExtensions
     {
         return builder.AddMiddleware(context =>
         {
-            // Configure a bunch of types shared by all the commands.
+            // Configure a bunch of shared types (not gonna say services)
             var commandLineOpts = context.BindRootCommandResult<ProgramOpts>();
             var config = new ConfigBuilder()
                 .AddDefaults()
                 .AddConfigFile(commandLineOpts.ConfigFile)
                 .AddValue(ConfigKeys.GameDir, commandLineOpts.GameDir)
                 .Build();
-            var game = new ThePlanetCrafter(string.IsNullOrWhiteSpace(config.GameDir)
-                ? new Steam().GetGameDirectory()
-                : config.GameDir);
+
+            var game = new ThePlanetCrafter(config.GameDir);
 
             // Put em into the binding context's services, they'll get injected as needed into handler ctors.
-            context.BindingContext.AddService(_ => config);
-            context.BindingContext.AddService(_ => game);
-            context.BindingContext.AddService(_ => game.BepInEx);
+            context.BindingContext.AddSingleton(config);
+            context.BindingContext.AddSingleton(game);
+            context.BindingContext.AddSingleton(game.BepInEx);
+            context.BindingContext.AddSingleton(game.ManagedFiles);
+            context.BindingContext.AddSingleton(game.Plugins);
         });
     }
 

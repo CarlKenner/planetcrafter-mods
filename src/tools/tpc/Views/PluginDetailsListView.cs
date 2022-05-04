@@ -5,7 +5,7 @@ using Doublestop.Tpc.Plugins;
 
 namespace Doublestop.Tpc.Views;
 
-internal sealed class PluginDetailsListView : ItemsView<InstalledPlugin>
+internal sealed class PluginDetailsListView : ItemsView<Plugin>
 {
     #region Fields
 
@@ -17,7 +17,7 @@ internal sealed class PluginDetailsListView : ItemsView<InstalledPlugin>
 
     #region Constructors
 
-    public PluginDetailsListView(IEnumerable<InstalledPlugin> plugins, bool showAssets)
+    public PluginDetailsListView(IEnumerable<Plugin> plugins, bool showAssets)
     {
         if (plugins == null) throw new ArgumentNullException(nameof(plugins));
         _showAssets = showAssets;

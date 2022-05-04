@@ -58,6 +58,9 @@ internal static class ConfigFile
         {
             for (var line = reader.ReadLine(); line != null; line = reader.ReadLine())
             {
+                if (IsCommentOrEmptyLine(line))
+                    continue;
+
                 if (!TryParseLine(line, out var key, out var value))
                     continue;
 
@@ -66,6 +69,33 @@ internal static class ConfigFile
         }
     }
 
+    /// <summary>
+    /// Returns <c>true</c> if the line is empty, whitespace, or begins with a comment (<c>#</c>).
+    /// </summary>
+    /// <param name="line"></param>
+    /// <returns></returns>
+    static bool IsCommentOrEmptyLine(string line)
+    {
+        foreach (var c in line)
+            if (c == '#')
+                return true;
+            else if (!char.IsWhiteSpace(c))
+                return false;
+
+        return true;
+    }
+
+    /// <summary>
+    /// Attempts to parse the line as <c>key = value</c>, trimming whitespace.
+    /// </summary>
+    /// <remarks>
+    /// Ending a line with a comment, eg <c>key = value # set key to value</c>, isn't supported.
+    /// In this example, the key setting would be set to <c>value # set key to value</c>.
+    /// </remarks>
+    /// <param name="line"></param>
+    /// <param name="key"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
     static bool TryParseLine(string line, [NotNullWhen(true)] out string? key, [NotNullWhen(true)] out string? value)
     {
         const char sep = '=';

@@ -3,6 +3,7 @@ using BepInEx;
 using HarmonyLib;
 using SpaceCraft;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Doublestop.RotatedCompass
 {

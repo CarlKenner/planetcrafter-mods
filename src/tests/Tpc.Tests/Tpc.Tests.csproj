@@ -15,4 +15,9 @@
     <PackageReference Include="coverlet.collector" Version="3.1.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\tools\Doublestop.Tpc.Common\Doublestop.Tpc.Common.csproj" />
+    <ProjectReference Include="..\..\tools\tpc\tpc.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,11 +1,11 @@
-﻿using System.Collections.Immutable;
-using System.CommandLine.Invocation;
+﻿using System.CommandLine.Invocation;
 using System.CommandLine.Rendering;
 using System.CommandLine.Rendering.Views;
+using System.Text.RegularExpressions;
 using Doublestop.Tpc.Commands;
-using Doublestop.Tpc.Plugins;
 using Doublestop.Tpc.Views;
 using Doublestop.Extensions.CommandLine;
+using Doublestop.Tpc.Internal;
 
 namespace Doublestop.Tpc.Handlers;
 
@@ -28,43 +28,63 @@ internal sealed class ListPluginsHandler : Handler<ListPluginsCommand>
 
     #region Public Methods
 
-    public override async ValueTask HandleAsync(ListPluginsCommand command, InvocationContext context, CancellationToken cancel)
+    public override ValueTask HandleAsync(ListPluginsCommand command, InvocationContext context, CancellationToken cancel)
     {
-        var totalPluginCount = await _game.Plugins.CountAsync(cancel);
-        var plugins = await GetAllLocalPluginsAsync(command, cancel);
+        var allPlugins = _game.Plugins.Plugins.ToList();
+        var termsPredicate = CreateTermsPredicate(command.SearchTerms, command.UseRegEx, command.MatchAllTerms);
+        var matches = allPlugins
+            .Where(p => termsPredicate(p.Name) ||
+                        termsPredicate(p.Guid) ||
+                        termsPredicate(p.File.Name))
+            .Distinct()
+            .ToList();
 
         View pluginsView = command.OutputMode switch
         {
-            ListOutputMode.D => new PluginDetailsListView(plugins, false),
-            ListOutputMode.A => new PluginDetailsListView(plugins, true),
-            ListOutputMode.N => new StringListView(plugins.Select(p => p.Name).Concat(new [] {""})),
-            ListOutputMode.F => new StringListView(plugins.Select(p => p.AssemblyFile.Name).Concat(new [] {""})),
-        _ => new PluginTableView(plugins)
+            ListOutputMode.D => new PluginDetailsListView(matches, false),
+            ListOutputMode.A => new PluginDetailsListView(matches, true),
+            ListOutputMode.N => new StringListView(matches.Select(p => p.Name).Concat(new[] { "" })),
+            ListOutputMode.F => new StringListView(matches.Select(p => p.File.Name).Concat(new[] { "" })),
+            _ => new PluginTableView(matches)
         };
 
-        new StackLayoutView
+        context.Console.Render(new StackLayoutView
         {
             new ContentView(TextSpan.Empty()),
             pluginsView,
-            new ContentView($"Matched {plugins.Count}/{totalPluginCount} {(totalPluginCount == 1 ? "plugin" : "plugins")}."),
+            new ContentView($"Matched {matches.Count}/{allPlugins.Count} {"plugins".Pluralize(allPlugins.Count)}."),
             new ContentView(TextSpan.Empty())
-        }.Render(new ConsoleRenderer(context.Console), Region.Scrolling);
+        });
+
+        return ValueTask.CompletedTask;
     }
 
     #endregion
 
     #region Private Methods
 
-    async ValueTask<IReadOnlyList<InstalledPlugin>> GetAllLocalPluginsAsync(ListPluginsCommand command, CancellationToken cancel)
+    static Func<string?, bool> CreateTermsPredicate(IEnumerable<string>? searchTerms, bool useRegex, bool matchAll)
     {
-        var request = SearchPluginsRequest.Empty with
+        if (searchTerms is null)
+            return _ => true;
+
+        var termList = searchTerms.Distinct().ToList();
+        if (!termList.Any())
+            return _ => true;
+
+        if (useRegex)
         {
-            SearchTerms = command.SearchTerms?.ToImmutableList() ?? ImmutableList<string>.Empty,
-            UseRegex = command.UseRegEx,
-            MatchAllTerms = command.MatchAllTerms
-        };
-        var result = await _game.Plugins.SearchAsync(request, cancel);
-        return result.Plugins;
+            var regexList = termList.Select(s => new Regex(s, RegexOptions.IgnoreCase)).ToArray();
+            if (matchAll)
+                return s => regexList.All(re => re.IsMatch(s ?? ""));
+
+            return s => regexList.Any(re => re.IsMatch(s ?? ""));
+        }
+        var matcher = new StringPatternMatcher(true);
+        if (matchAll)
+            return s => termList.WhereNotNull().All(term => matcher.IsMatch(s ?? "", term));
+        
+        return s => termList.WhereNotNull().Any(term => matcher.IsMatch(s ?? "", term));
     }
 
     #endregion

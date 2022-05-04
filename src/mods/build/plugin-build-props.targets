@@ -1,28 +1,31 @@
 <Project>
+  <!-- 
+    Look for a file called .gamedir in the solution directory. 
+    If it exists, set the GameDir property to its contents.
+  -->
+  <PropertyGroup Condition="Exists('$(SolutionDir).gamedir')">
+    <GameDir>$([System.IO.File]::ReadAllText("$(SolutionDir).gamedir").Trim())</GameDir>
+  </PropertyGroup>
+
+  <!-- Otherwise, try to set GameDir as follows. -->
+
   <!-- GameDir: doublestop's local system -->
-  <PropertyGroup Condition="Exists('d:\Games\Steam\steamapps\common\The Planet Crafter')">
+  <PropertyGroup Condition="'$(GameDir)' == '' and Exists('d:\Games\Steam\steamapps\common\The Planet Crafter')">
     <GameDir>d:\Games\Steam\steamapps\common\The Planet Crafter\</GameDir>
   </PropertyGroup>
 
-  <!-- GameDir: new developer's local system. copy and uncomment and modify for your system. -->
-  <!--<PropertyGroup Condition="Exists('C:\path\to\steam\steamapps\common\The Planet Crafter')">
-    <GameDir>C:\path\to\steam\steamapps\common\The Planet Crafter\</GameDir>
-  </PropertyGroup>-->
-
-  <!-- 
-  The GameDir prop isn't set, so nothing above matched. Try a 'reasonable' default.
-  -->
+  <!-- The GameDir prop isn't set, so nothing above matched. Try a reasonable default. -->
   <PropertyGroup Condition="'$(GameDir)' == ''">
     <GameDir>c:\Program Files (x86)\Steam\steamapps\common\The Planet Crafter\</GameDir>
   </PropertyGroup>
 
   <!-- Fill out the rest of the build properties from the GameDir -->
   <PropertyGroup>
-    <GameManaged>$(GameDir)Planet Crafter_Data\Managed\</GameManaged>
+    <GameManaged>$(GameDir)\Planet Crafter_Data\Managed\</GameManaged>
     <PluginsFolder>$(GameDir)\BepInEx\plugins</PluginsFolder>
   </PropertyGroup>
 
-  <!-- Packages that every mod will need to pull in. -->
+  <!-- Packages that every plugin will need to pull in. -->
   <ItemGroup>
     <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
     <PackageReference Include="BepInEx.Core" Version="5.*" />
@@ -30,7 +33,7 @@
     <PackageReference Include="UnityEngine.Modules" Version="2020.3.26" IncludeAssets="compile" />
   </ItemGroup>
 
-  <!-- By default, every mod will reference the game's Unity output assembly. -->
+  <!-- By default, every plugin will reference the game's Unity output assembly. -->
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
       <SpecificVersion>False</SpecificVersion>

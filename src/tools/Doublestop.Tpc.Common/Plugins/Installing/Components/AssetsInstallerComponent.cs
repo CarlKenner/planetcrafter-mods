@@ -43,12 +43,16 @@ internal sealed class AssetsInstallerComponent : InstallerComponent
         }, cancel);
     }
 
-    public override async ValueTask RemoveAsync(InstalledPlugin plugin, CancellationToken cancel)
+    public override async ValueTask RemoveAsync(PluginFile pluginFile, CancellationToken cancel)
     {
         await Task.Run(() =>
         {
-            if (plugin.AssetsDirectory.Exists)
-                plugin.AssetsDirectory.Delete(true);
+            var pluginDir = pluginFile.Directory ??
+                            Path.GetPathRoot(Environment.CurrentDirectory) ??
+                            Path.GetFullPath("/");
+            var assetsDir = Path.Combine(pluginDir, pluginFile.NameWithoutExtension);
+            if (Directory.Exists(assetsDir))
+                Directory.Delete(assetsDir, true);
         }, cancel);
     }
 

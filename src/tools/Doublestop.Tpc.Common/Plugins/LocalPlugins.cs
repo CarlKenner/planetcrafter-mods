@@ -1,25 +1,34 @@
-﻿using System.Collections.Immutable;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
-using Doublestop.Tpc.Internal;
+﻿using System.Collections;
+using System.Collections.Immutable;
+using Doublestop.Tpc.Game;
 using Doublestop.Tpc.Plugins.Installing;
 
 namespace Doublestop.Tpc.Plugins;
 
-public sealed class LocalPlugins
+/// <summary>
+/// Represents plugins installed on the local system.
+/// </summary>
+/// <remarks>
+/// Most <c>get</c> methods return collections. It's possible, though unlikely,
+/// two plugin files exist with identical plugin guids and/or names.
+/// <br></br>
+/// Most of the time, a guid or name match will return 0 or 1 plugins.
+/// However, callers must be prepared to handle the possiblity of multiple matches.
+/// </remarks>
+public sealed class LocalPlugins : IEnumerable<PluginFile>
 {
     #region Fields
 
-    readonly ThePlanetCrafter _game;
+    readonly BepInExHelper _bepInEx;
 
     #endregion
 
     #region Constructors
 
-    public LocalPlugins(ThePlanetCrafter game)
+    public LocalPlugins(BepInExHelper bepInEx)
     {
-        _game = game ?? throw new ArgumentNullException(nameof(game));
+        _bepInEx = bepInEx ?? throw new ArgumentNullException(nameof(bepInEx));
+        Installer = new Installer(_bepInEx);
     }
 
     #endregion
@@ -29,198 +38,124 @@ public sealed class LocalPlugins
     /// <summary>
     /// Returns all the files that might contain a plugin.
     /// </summary>
-    public IEnumerable<FileInfo> PluginFiles =>
-        _game.BepInEx.PluginsDirectory.EnumerateFiles("*.dll", SearchOption.TopDirectoryOnly);
+    /// <remarks>
+    /// This is essentially a list of <c>dll</c> files, not necessarily a list of valid plugin assemblies.
+    /// <br></br>
+    /// The number of plugin files will not necessarily equal the number of plugins
+    /// the game discovers and loads. If any plugin files contain more that one plugin (or none),
+    /// or any plugin file fails to load (see <see cref="PlugFileLoadError"/>), the counts will certainly disagree.
+    /// </remarks>
+    public IEnumerable<PluginFile> PluginFiles =>
+        _bepInEx.PluginDlls.Select(path => new PluginFile(path, _bepInEx.CoreDlls));
+
+    /// <summary>
+    /// Returns a flattened collection of plugins across all <see cref="PluginFiles"/>.
+    /// </summary>
+    /// <remarks>
+    /// This is a safe enumerator, returning only those plugins which loaded successfully.
+    /// <br></br>
+    /// Subscribe to the <see cref="PlugFileLoadError"/> event to be notified of load errors.
+    /// <br></br>
+    /// This enumerator is not cached, and is renewed with each read.
+    /// Take a list of this property if you wish to work with a snapshot.
+    /// </remarks>
+    public IEnumerable<Plugin> Plugins => EnumeratePlugins();
+
+    public Installer Installer { get; }
+
+    #endregion
+
+    #region Events
+
+    public event Action<PluginFile, Exception>? PlugFileLoadError;
 
     #endregion
 
     #region Public Methods
 
-    /// <summary>
-    /// Returns the count of installed plugins.
-    /// </summary>
-    /// <param name="cancel"></param>
-    /// <returns></returns>
-    public async ValueTask<int> CountAsync(CancellationToken cancel)
+    public ValueTask<PluginFile?> GetFileByName(string filename, CancellationToken cancel)
     {
-        var tasks = PluginFiles.Select(async f => await GetAsync(f.Name, cancel));
-        var files = await Task.WhenAll(tasks);
-        return files.Length;
+        if (filename == null) throw new ArgumentNullException(nameof(filename));
+        return ValueTask.FromResult(TryLoad());
+        PluginFile? TryLoad()
+        {
+            var fullPath = Path.Combine(_bepInEx.PluginsDirectory.FullName, filename);
+            return File.Exists(fullPath)
+                ? new PluginFile(fullPath, _bepInEx.CoreDlls)
+                : null;
+        }
     }
 
     /// <summary>
-    /// Returns a list of plugins matching the search request.
-    /// </summary>
-    /// <param name="request"></param>
-    /// <param name="cancel"></param>
-    /// <returns></returns>
-    public async ValueTask<SearchPluginsResult> SearchAsync(SearchPluginsRequest? request, CancellationToken cancel)
-    {
-        request ??= SearchPluginsRequest.Empty;
-        var allPlugins = await GetAllPluginsAsync(cancel);
-        var totalCount = allPlugins.Count;
-        var filteredList = ApplySearchFilters(request, allPlugins).ToList();
-        var matchedCount = filteredList.Count;
-        return new SearchPluginsResult(totalCount, matchedCount, filteredList);
-    }
-
-    /// <summary>
-    /// Installs a plugin.
-    /// </summary>
-    /// <param name="package"></param>
-    /// <param name="cancel"></param>
-    /// <returns></returns>
-    /// <exception cref="FileNotFoundException"></exception>
-    public async ValueTask<InstalledPlugin> AddAsync(PluginPackage package, CancellationToken cancel)
-    {
-        var installer = new Installer(_game.BepInEx.PluginsDirectory.FullName);
-        await installer.InstallAsync(package, cancel);
-        return await GetAsync(package.TargetAssemblyFileName, cancel) ??
-               throw new FileNotFoundException($"Plugin {package.TargetAssemblyFileName} was not found after installation.");
-    }
-
-    /// <inheritdoc cref="RemoveAsync"/>
-    public async ValueTask<bool> RemoveByGuidAsync(string pluginGuid, CancellationToken cancel)
-    {
-        var plugin = await GetAsync(pluginGuid, cancel);
-        if (plugin is null || !plugin.Exists)
-            return false;
-
-        return await RemoveAsync(plugin, cancel);
-    }
-
-    /// <summary>
-    /// Removes an installed plugin.
-    /// </summary>
-    /// <param name="plugin"></param>
-    /// <param name="cancel"></param>
-    /// <returns></returns>
-    public async Task<bool> RemoveAsync(InstalledPlugin plugin, CancellationToken cancel)
-    {
-        if (plugin == null) throw new ArgumentNullException(nameof(plugin));
-        if (!plugin.Exists)
-            return false;
-
-        var installer = new Installer(_game.BepInEx.PluginsDirectory.FullName);
-        await installer.RemoveAsync(plugin, cancel);
-        return true;
-    }
-
-    /// <summary>
-    /// Returns the plugin with the specified guid.
+    /// Returns plugins matching the specified guid.
     /// </summary>
     /// <param name="pluginGuid"></param>
     /// <param name="cancel"></param>
     /// <returns></returns>
-    public async ValueTask<InstalledPlugin?> GetAsync(string pluginGuid, CancellationToken cancel) =>
-        (await GetAllPluginsAsync(cancel)).FirstOrDefault(plugin => string.Equals(
-            plugin.Guid.Trim(),
-            pluginGuid.Trim(),
-            StringComparison.OrdinalIgnoreCase));
+    public ValueTask<IReadOnlyList<Plugin>> GetPluginsByGuidAsync(string pluginGuid, CancellationToken cancel)
+    {
+        if (pluginGuid == null) throw new ArgumentNullException(nameof(pluginGuid));
+        var list = Plugins
+            .Where(p => PluginGuidComparer.Instance.Equals(pluginGuid, p.Guid))
+            .ToImmutableList();
+
+        return ValueTask.FromResult<IReadOnlyList<Plugin>>(list);
+    }
+
+    public ValueTask<IReadOnlyList<Plugin>> GetPluginsByNameAsync(string name, CancellationToken cancel)
+    {
+        if (name == null) throw new ArgumentNullException(nameof(name));
+        var list = Plugins
+            .Where(p => PluginNameComparer.Instance.Equals(name, p.Name))
+            .ToImmutableList();
+
+        return ValueTask.FromResult<IReadOnlyList<Plugin>>(list);
+    }
+
+    public IEnumerator<PluginFile> GetEnumerator() => PluginFiles.GetEnumerator();
 
     #endregion
 
     #region Private Methods
 
-    async ValueTask<IReadOnlyList<InstalledPlugin>> GetAllPluginsAsync(CancellationToken cancel)
+    IEnumerable<Plugin> EnumeratePlugins()
     {
-        var tasks = PluginFiles.Select(async f => await ReadPluginAssemblyAsync(f.Name, cancel));
-        var assemblies = await Task.WhenAll(tasks);
-        return FlattenAssembliesToPlugins(assemblies.WhereNotNull()).ToImmutableList();
-    }
-
-    async ValueTask<PluginAssembly?> ReadPluginAssemblyAsync(string assemblyFileName, CancellationToken cancel)
-    {
-        return await Task.Run(() =>
+        foreach (var file in PluginFiles)
         {
-            // If assemblyFileName is relative, it's probably just a filename.
-            // Whatever the case, relative paths are rooted to the PluginsDirectory.
-            if (!Path.IsPathRooted(assemblyFileName))
-                assemblyFileName = Path.Combine(_game.BepInEx.PluginsDirectory.FullName, assemblyFileName);
+            // Can't yield from a try/catch, so use an intermediary local
+            // that will return a null enumerator in the event of a load error.
+            var plugins = TryLoadPlugins(file);
+            if (plugins is null)
+                // error occurred, event notified.
+                continue;
 
-            if (!File.Exists(assemblyFileName))
+            // plugin file loaded, now combine info + file into an all powerful collection of plugins.
+            foreach (var info in plugins)
+                yield return new Plugin(info, file);
+        }
+
+        IEnumerable<PluginInfo>? TryLoadPlugins(PluginFile file)
+        {
+            try
+            {
+                return file.ToList();
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    PlugFileLoadError?.Invoke(file, ex);
+                }
+                catch
+                {
+                    // ignored
+                }
                 return null;
-
-            using var context = new MetadataLoadContext(
-                new PathAssemblyResolver(
-                    GetCommonResolverPaths().Prepend(assemblyFileName)));
-            var assembly = context.LoadFromAssemblyPath(assemblyFileName);
-            return new PluginAssembly(
-                assemblyFileName,
-                File.GetLastWriteTimeUtc(assemblyFileName),
-                InstalledPlugin.GetPlugins(assembly));
-        }, cancel);
-
-        #region Local Helpers
-
-        IEnumerable<string> GetCommonResolverPaths()
-        {
-            // Todo: Allow configuration of alternate/additional resolver paths
-
-            // For now, the following paths are searched:
-            // * .../System.Private.CoreLib.dll
-            // * .../mscorlib.dll
-            // * .../The Planet Crafter/BepInEx/core/*.dll
-
-            var runtimeDirectory = RuntimeEnvironment.GetRuntimeDirectory();
-            var systemPrivateCoreLib = Path.Combine(runtimeDirectory, "System.Private.CoreLib.dll");
-            var msCorLib = Path.Combine(runtimeDirectory, "mscorlib.dll");
-
-            yield return systemPrivateCoreLib;
-            yield return msCorLib;
-            foreach (var file in _game.BepInEx.CoreDlls)
-                yield return file.FullName;
-        }
-
-        #endregion
-    }
-
-    static IEnumerable<InstalledPlugin> ApplySearchFilters(SearchPluginsRequest request, IEnumerable<InstalledPlugin> plugins)
-    {
-        // Search terms
-        if (request.SearchTerms.Any())
-        {
-            if (request.UseRegex)
-            {
-                var regexList = request.SearchTerms.Distinct().Select(s => new Regex(s, RegexOptions.IgnoreCase)).ToArray();
-                if (request.MatchAllTerms)
-                    plugins = plugins.Where(p => regexList.All(r =>
-                        r.IsMatch(p.Name) ||
-                        r.IsMatch(p.AssemblyFile.Name)));
-                else
-                    plugins = plugins.Where(p => regexList.Any(r =>
-                        r.IsMatch(p.Name) ||
-                        r.IsMatch(p.AssemblyFile.Name)));
-            }
-            else
-            {
-                var matcher = new StringPatternMatcher(true);
-                if (request.MatchAllTerms)
-                    plugins = plugins.Where(p => request.SearchTerms.All(t =>
-                        matcher.IsMatch(p.Name, t) ||
-                        matcher.IsMatch(p.AssemblyFile.Name, t)));
-                else
-                    plugins = plugins.Where(p => request.SearchTerms.Any(t =>
-                        matcher.IsMatch(p.Name, t) ||
-                        matcher.IsMatch(p.AssemblyFile.Name, t)));
             }
         }
-
-        // tbd: more filters (last modified, version, etc)
-
-        return plugins;
     }
 
-    /// <summary>
-    /// Always orders plugins by assembly file name, then by the names of the plugins (typically 1) contained in that assembly.
-    /// </summary>
-    /// <param name="pluginAssemblies"></param>
-    /// <returns></returns>
-    static IEnumerable<InstalledPlugin> FlattenAssembliesToPlugins(IEnumerable<PluginAssembly> pluginAssemblies) =>
-        pluginAssemblies
-            .OrderBy(a => a.AssemblyFileName, StringComparer.OrdinalIgnoreCase)
-            .SelectMany(a => a.Plugins)
-            .OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase);
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     #endregion
 }
