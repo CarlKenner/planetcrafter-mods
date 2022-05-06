@@ -1,4 +1,6 @@
-﻿namespace Doublestop.Tpc.Plugins;
+﻿using Doublestop.Tpc.Plugins;
+
+namespace Doublestop.Tpc.Internal;
 
 public sealed record SearchPluginsResult(int TotalPluginCount, int TotalMatchedPluginsCount, IReadOnlyList<Plugin> Plugins)
 {

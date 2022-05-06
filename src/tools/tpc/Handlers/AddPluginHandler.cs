@@ -28,7 +28,7 @@ internal sealed class AddPluginHandler : Handler<AddPluginCommand>
     public override async ValueTask HandleAsync(AddPluginCommand command, InvocationContext context, CancellationToken cancel)
     {
         var package = CreateInstallPackage(command);
-        var pluginFile = await _game.Plugins.Installer.InstallAsync(package, cancel);
+        var pluginFile = await _game.InstallPluginAssembly(package, cancel);
         if (!pluginFile.Exists)
             throw new FileNotFoundException($"Plugin file {pluginFile.Path} was not found after installation.");
 

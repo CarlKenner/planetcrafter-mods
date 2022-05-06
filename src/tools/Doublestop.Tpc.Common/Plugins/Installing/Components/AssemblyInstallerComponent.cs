@@ -28,10 +28,10 @@ internal sealed class AssemblyInstallerComponent : InstallerComponent
         return ValueTask.CompletedTask;
     }
 
-    public override ValueTask RemoveAsync(PluginFile pluginFile, CancellationToken cancel)
+    public override ValueTask RemoveAsync(PluginAssembly pluginAssembly, CancellationToken cancel)
     {
-        if (pluginFile.Exists)
-            pluginFile.Delete();
+        if (pluginAssembly.Exists)
+            pluginAssembly.Delete();
 
         return ValueTask.CompletedTask;
     }

@@ -9,7 +9,7 @@
     },
     "tpc remove": {
       "commandName": "Project",
-      "commandLineArgs": "remove doublestop.rotatedcompass.dll"
+      "commandLineArgs": "remove dou*"
     },
     "tpc ls": {
       "commandName": "Project",

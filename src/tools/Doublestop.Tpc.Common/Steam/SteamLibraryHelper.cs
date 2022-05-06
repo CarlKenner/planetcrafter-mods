@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using ValveKeyValue;
 
@@ -7,25 +8,23 @@ namespace Doublestop.Tpc.Steam;
 /// <summary>
 /// Provides read access to the Steam library database on the local system.
 /// </summary>
-[DebuggerDisplay("{_libraryFoldersFilePath}")]
+[DebuggerDisplay("{_libraryFoldersVdfFile}")]
 internal sealed class SteamLibraryHelper
 {
     #region Fields
 
     internal const string LibraryFoldersFileName = "libraryfolders.vdf";
 
-    readonly string _libraryFoldersFilePath;
+
+    readonly FileInfo _libraryFoldersVdfFile;
 
     #endregion
 
     #region Constructors
 
-    public SteamLibraryHelper(string libraryFoldersFilePath)
+    public SteamLibraryHelper(FileInfo libraryFoldersVdfFile)
     {
-        if (string.IsNullOrWhiteSpace(libraryFoldersFilePath))
-            throw new ArgumentException("Library folders file path cannot be null or whitespace.", nameof(libraryFoldersFilePath));
-
-        _libraryFoldersFilePath = libraryFoldersFilePath;
+        _libraryFoldersVdfFile = libraryFoldersVdfFile ?? throw new ArgumentNullException(nameof(libraryFoldersVdfFile));
     }
 
     #endregion
@@ -38,10 +37,10 @@ internal sealed class SteamLibraryHelper
     /// <param name="steamDirectory"></param>
     /// <returns></returns>
     public static SteamLibraryHelper CreateDefault(string steamDirectory) =>
-        new(Path.Combine(
+        new(new FileInfo(Path.Combine(
             steamDirectory,
             SteamHelper.SteamAppsDirName,
-            LibraryFoldersFileName));
+            LibraryFoldersFileName)));
 
     /// <summary>
     /// I should be documented, but I'm not.
@@ -59,64 +58,29 @@ internal sealed class SteamLibraryHelper
     /// <exception cref="FileNotFoundException"></exception>
     public DirectoryInfo? GetGameDirectory(int appId)
     {
-        // todo: refactor, at the very least splitting the loop into methods.
         var serializer = KVSerializer.Create(KVSerializationFormat.KeyValues1Text);
-
-        KVObject Deserialize(string file)
-        {
-            using var stream = File.Open(file, FileMode.Open, FileAccess.Read);
-            return serializer.Deserialize(stream);
-        }
 
         try
         {
-            var libraryFolders = Deserialize(_libraryFoldersFilePath);
+            var libraryFolders = Deserialize(_libraryFoldersVdfFile.FullName);
             foreach (var folder in libraryFolders.Children)
             {
-                // Look for an "apps" child object.
-                var appIds = folder.Children.FirstOrDefault(t => t.Name == "apps");
-                if (appIds?.Value.ValueType is not KVValueType.Collection)
+                // Look for this app id in the folder["apps"] collection.
+                if (!ContainsAppId(folder, out var folderDirectory)) 
                     continue;
 
-                // "apps" is a collection of appid:idk_timestamp_maybe pairs.
-                // We're only interested in locating the app id, no interest in the value.
-                if (appIds.Children.All(o => !IsSameAppId(o, appId)))
-                    // this app id wasn't found in this folder. keep looking in the next folder.
+                // Read the "installdir" property from the app's manifest file.
+                if (!ReadAppManifestInstallDir(folderDirectory, out var installDir))
+                    // file not found, or installdir not set / bad value. keep looking.
                     continue;
 
-                // Found the app id. Now, need to open the folder referenced by folder["path"]
-                // and look for the app manifest: appmanifest_<appId>.acf
-                var folderDirectory = folder["path"]?.ToString(CultureInfo.CurrentCulture);
-                if (string.IsNullOrWhiteSpace(folderDirectory))
-                    // "path" value not set. try another folder.
-                    continue;
-
-                var appManifestFile = Path.Combine(folderDirectory, SteamHelper.SteamAppsDirName, $"appmanifest_{appId}.acf");
-                if (!File.Exists(appManifestFile))
-                    // Not found. Probably won't see this app id again, but keep going anyway. Never know! 
-                    continue;
-
-                // Deserialize the manifest and look for the "installdir" property.
-                // If found, the corresponding value marks the name of the directory where the game was installed,
-                // under this library folder's "steamapps/common" directory.
-                // eg, <this library>/steamapps/common/The Planet Crafter
-                var appManifest = Deserialize(appManifestFile);
-                var installDir = appManifest["installdir"].ToString(CultureInfo.CurrentCulture);
-                if (string.IsNullOrWhiteSpace(installDir))
-                    // "installdir" value missing from the manifest. keep looking.
-                    continue;
-
-                // Since installDir is just a directory name, not a path, we need to
-                // build a complete path using all the other stuff we know.
-                // <this library folder's path>/common/<installDir>
+                // installDir is just a directory name, so we need to
+                // combine it with "folder path/common" to get the full path.
+                // eg folder["path"]/common/<installDir>
                 var gameDir = Path.Combine(folderDirectory, SteamHelper.CommonRelativePath, installDir);
                 if (!Directory.Exists(gameDir))
                     // well we got this far, but the directory wasn't found.
-                    // keeeeeeep looking. maybe it was moved and Steam failed to update the library files. who knows.
-                    // It could still be out there, waiting for us.
-                    // It's getting late. The wind howls.
-                    // You can't see into the dark that lies ahead, but you sense something is there. Continue?
-                    // > _
+                    // keep looking. maybe it was moved and Steam failed to update the library files. who knows.
                     continue;
 
                 return new DirectoryInfo(gameDir);
@@ -128,12 +92,50 @@ internal sealed class SteamLibraryHelper
         catch (FileNotFoundException ex)
         {
             throw new FileNotFoundException(
-                $"Steam Library file [{Path.GetFileName(_libraryFoldersFilePath)}] was not found.",
+                $"Steam Library file [{_libraryFoldersVdfFile.Name}] was not found.",
                 ex);
         }
 
-        static bool IsSameAppId(KVObject obj, int appId) =>
-            int.TryParse(obj.Name, out var n) && n == appId;
+        #region Local Helpers
+
+        KVObject Deserialize(string file)
+        {
+            using var stream = File.Open(file, FileMode.Open, FileAccess.Read);
+            return serializer.Deserialize(stream);
+        }
+
+        // Attempts to open and read "installdir" from the app id's manifest in the provided directory.
+        bool ReadAppManifestInstallDir(string folderDirectory, [NotNullWhen(true)] out string? installDirName)
+        {
+            var appManifestFile = Path.Combine(folderDirectory, SteamHelper.SteamAppsDirName, $"appmanifest_{appId}.acf");
+            if (!File.Exists(appManifestFile))
+            {
+                installDirName = null;
+                return false;
+            }
+            // If found, the corresponding value marks the name of the directory where the game was installed
+            var appManifest = Deserialize(appManifestFile);
+            installDirName = appManifest["installdir"].ToString(CultureInfo.CurrentCulture);
+            return !string.IsNullOrWhiteSpace(installDirName);
+        }
+
+        // Returns true if folder[apps] contains the app id we're looking for.
+        bool ContainsAppId(KVObject folder, [NotNullWhen(true)] out string? libraryFolderPath)
+        {
+            libraryFolderPath = null;
+            var containsApp = folder.Children.Any(c => c.Name == "apps" &&
+                                                       c.Children.Any(o => IsSameAppId(o, appId)));
+
+            if (containsApp)
+                libraryFolderPath = folder["path"]?.ToString(CultureInfo.CurrentCulture);
+
+            return !string.IsNullOrWhiteSpace(libraryFolderPath);
+
+            static bool IsSameAppId(KVObject obj, int appId) =>
+                int.TryParse(obj.Name, out var n) && n == appId;
+        }
+
+        #endregion
     }
 
     #endregion

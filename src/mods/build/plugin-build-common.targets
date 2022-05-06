@@ -1,0 +1,66 @@
+<Project>
+  <!--
+  plugin-build-common.targets
+  ===========================
+  Pulls in required dependencies for a basic plugin.
+  -->
+
+  <!-- Default plugin project settings -->
+  <PropertyGroup>
+    <TargetFramework>net462</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+    <Platforms>AnyCPU</Platforms>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+
+  <!-- 
+  Look for a file called .gamedir in the solution directory. 
+  If it exists, set the GameDir property to its contents.
+  -->
+  <PropertyGroup Condition="'$(GameDir)' == '' and Exists('$(SolutionDir).gamedir')">
+    <GameDir>$([System.IO.File]::ReadAllText("$(SolutionDir).gamedir").Trim())</GameDir>
+  </PropertyGroup>
+
+  <!-- Otherwise, try to set GameDir as follows. -->
+
+  <!-- GameDir: doublestop's local system -->
+  <PropertyGroup Condition="'$(GameDir)' == '' and Exists('d:\Games\Steam\steamapps\common\The Planet Crafter')">
+    <GameDir>d:\Games\Steam\steamapps\common\The Planet Crafter\</GameDir>
+  </PropertyGroup>
+
+  <!-- Begin insert additional default locations -->
+  
+  <!--<PropertyGroup Condition="'$(GameDir)' == '' and Exists('a:\Steam\steamapps\common\The Planet Crafter')">
+    <GameDir>a:\Steam\steamapps\common\The Planet Crafter\</GameDir>
+  </PropertyGroup>-->
+
+  <!-- End insert additional default locations -->
+
+  <!--GameDir default, when none of the above applies. -->
+  <PropertyGroup Condition="'$(GameDir)' == ''">
+    <GameDir>c:\Program Files (x86)\Steam\steamapps\common\The Planet Crafter\</GameDir>
+  </PropertyGroup>
+
+  <!-- Global property defs (GameManaged, PluginsFolder) -->
+  <PropertyGroup>
+    <GameManaged>$(GameDir)\Planet Crafter_Data\Managed\</GameManaged>
+    <PluginsFolder>$(GameDir)\BepInEx\plugins\</PluginsFolder>
+  </PropertyGroup>
+
+  <!-- Packages common to every plugin. -->
+  <ItemGroup>
+    <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
+    <PackageReference Include="BepInEx.Core" Version="5.*" />
+    <PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
+    <PackageReference Include="UnityEngine.Modules" Version="2020.3.26" IncludeAssets="compile" />
+  </ItemGroup>
+
+  <!-- Reference the game's Assembly-CSharp.dll, unless NoAssemblyCSharp==true. -->
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp" Condition="'$(NoAssemblyCSharp)' != 'true'">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>$(GameManaged)Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+</Project>

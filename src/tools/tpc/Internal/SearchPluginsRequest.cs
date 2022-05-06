@@ -1,6 +1,6 @@
 ﻿using System.Collections.Immutable;
 
-namespace Doublestop.Tpc.Plugins;
+namespace Doublestop.Tpc.Internal;
 
 public sealed record SearchPluginsRequest(
     IReadOnlyCollection<string>? SearchTerms = null,

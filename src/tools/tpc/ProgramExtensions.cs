@@ -34,8 +34,6 @@ public static class ProgramExtensions
             // Put em into the binding context's services, they'll get injected as needed into handler ctors.
             context.BindingContext.AddSingleton(config);
             context.BindingContext.AddSingleton(game);
-            context.BindingContext.AddSingleton(game.BepInEx);
-            context.BindingContext.AddSingleton(game.ManagedFiles);
             context.BindingContext.AddSingleton(game.Plugins);
         });
     }

@@ -1,11 +1,11 @@
 ﻿using System.Collections.Immutable;
 using System.CommandLine.Rendering;
 using System.CommandLine.Rendering.Views;
-using Doublestop.Tpc.Plugins;
+using Doublestop.Tpc.Plugins.Metadata;
 
 namespace Doublestop.Tpc.Views;
 
-internal sealed class PluginDetailsListView : ItemsView<Plugin>
+internal sealed class PluginDetailsListView : ItemsView<PluginMetadata>
 {
     #region Fields
 
@@ -17,7 +17,7 @@ internal sealed class PluginDetailsListView : ItemsView<Plugin>
 
     #region Constructors
 
-    public PluginDetailsListView(IEnumerable<Plugin> plugins, bool showAssets)
+    public PluginDetailsListView(IEnumerable<PluginMetadata> plugins, bool showAssets)
     {
         if (plugins == null) throw new ArgumentNullException(nameof(plugins));
         _showAssets = showAssets;

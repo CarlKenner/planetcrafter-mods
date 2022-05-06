@@ -2,6 +2,7 @@
 using System.CommandLine.Rendering.Views;
 using Doublestop.Tpc.Internal;
 using Doublestop.Tpc.Plugins;
+using Doublestop.Tpc.Plugins.Metadata;
 
 namespace Doublestop.Tpc.Views;
 
@@ -15,17 +16,20 @@ internal sealed class MultiplePluginsWarningView : View
 
     #region Constructors
 
-    public MultiplePluginsWarningView(PluginFile file)
+    public MultiplePluginsWarningView(IReadOnlyList<PluginMetadata> plugins)
     {
-        if (file == null) throw new ArgumentNullException(nameof(file));
-        var plugins = file.Plugins.ToList();
         _innerView = new StackLayoutView();
-        _innerView.Add(new ContentView($"{file.Name} contains {plugins.Count} {"plugins".Pluralize(plugins.Count)}."));
+        _innerView.Add(new ContentView($"Removing {plugins.Count} {"plugins".Pluralize(plugins.Count)}."));
         _innerView.Add(new ContentView(TextSpan.Empty()));
-        foreach (var plugin in plugins.OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase))
+
+        var orderedPlugins = plugins
+            .OrderBy(p => p.Name, PluginNameComparer.Instance)
+            .ThenBy(p => p.AssemblyFileName, NoCaseTrimmedStringComparer.Default);
+
+        foreach (var plugin in orderedPlugins)
             _innerView.Add(new ContentView($"  * {plugin.Name} [{plugin.Version}]"));
+
         _innerView.Add(new ContentView(TextSpan.Empty()));
-        _innerView.Add(new ContentView("Removing this file will remove them all."));
         _innerView.Add(new ContentView("Continue? [y/N] "));
     }
 

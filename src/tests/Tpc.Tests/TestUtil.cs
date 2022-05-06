@@ -1,3 +1,4 @@
+using Doublestop.Tpc;
 using Doublestop.Tpc.Config;
 
 namespace Tpc.Tests;
@@ -9,4 +10,7 @@ internal static class TestUtil
             .AddDefaults()
             .AddConfigFile(null)
             .Build();
+
+    internal static ThePlanetCrafter CreateGameInstance(string? gameDir = null) => 
+        new(GetTpcConfig().GameDir);
 }

@@ -1,0 +1,28 @@
+<Project>
+  <!--
+  plugin-post-build-autocopy-targets
+  ==================================
+  Copies the plugin assembly to the BepInEx/plugins directory after every build.
+  By default, this is enabled for every plugin project.
+  Disable this behavior by setting <NoCopyDlls>true</NoCopyDlls> in a plugin's project file.
+  -->
+
+  <Target Name="CopyDlls" AfterTargets="Build">
+    <!-- copy not gonna happen message -->
+    <Message 
+      Condition="'$(NoCopyDlls)' == 'true'"
+      Importance="High" 
+      Text="NoCopyDlls property found. Plugin assembly auto-copy disabled for $(AssemblyName)." />
+
+    <!-- copy gonna happen message -->
+    <Message 
+      Condition="'$(NoCopyDlls)' != 'true'"
+      Importance="High" 
+      Text="Copying plugin assembly $(AssemblyName) to $(PluginsFolder)" />
+    
+    <Copy 
+      Condition="'$(NoCopyDlls)' != 'true'"
+      SourceFiles="$(TargetDir)$(AssemblyName).dll" 
+      DestinationFolder="$(PluginsFolder)\" />
+  </Target>
+</Project>

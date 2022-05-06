@@ -1,9 +1,12 @@
-﻿using System.CommandLine;
+﻿using System.Collections.Immutable;
+using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.Diagnostics;
 using Doublestop.Tpc.Commands;
 using Doublestop.Extensions.CommandLine;
 using Doublestop.Tpc.Internal;
 using Doublestop.Tpc.Plugins;
+using Doublestop.Tpc.Plugins.Metadata;
 using Doublestop.Tpc.Views;
 
 namespace Doublestop.Tpc.Handlers;
@@ -29,65 +32,62 @@ internal sealed class RemovePluginHandler : Handler<RemovePluginCommand>
 
     public override async ValueTask HandleAsync(RemovePluginCommand command, InvocationContext context, CancellationToken cancel)
     {
-        var file = await _game.Plugins.GetFileByName(command.File, cancel);
-        if (file is null)
+        var plugins = SearchPlugins.Instance.Search(_game.Plugins,
+                command.SearchTerms?.ToImmutableList() ?? ImmutableList<string>.Empty,
+                false,
+                true)
+            .ToImmutableList();
+
+        if (!plugins.Any())
         {
-            context.SetResult(ErrorCodes.NotFound, $"PluginFile not found: {command.File}");
+            context.SetResult(ErrorCodes.NotFound, "Found no matching plugins.");
             return;
         }
-        if (!await ValidateAndConfirmAsync(command, file, context, cancel))
+        if (!await ValidateAndConfirmAsync(command, plugins, context, cancel))
             // the validate method sets context result as needed
             return;
 
-        await _game.Plugins.Installer.RemoveAsync(file, cancel);
-        context.Console.WriteLine($"Removed {file.Name}.");
+        var pluginAssemblies = plugins
+            .Select(p => p.AssemblyFileName)
+            .Distinct(NoCaseTrimmedStringComparer.Default);
+
+        foreach (var assemblyFile in pluginAssemblies)
+        {
+            var assembly = _game.Plugins.GetAssembly(assemblyFile);
+            if (assembly is null)
+                continue;
+
+            await _game.RemovePluginAssembly(assembly, cancel);
+            context.Console.WriteLine($"Removed {assembly.Name}.");
+        }
     }
 
     #endregion
 
     #region Private Methods
 
-    static async ValueTask<bool> ValidateAndConfirmAsync(RemovePluginCommand command, PluginFile file,
+    static async ValueTask<bool> ValidateAndConfirmAsync(RemovePluginCommand command, IReadOnlyList<PluginMetadata> plugins,
         InvocationContext context, CancellationToken cancel)
     {
-        var pluginCount = file.Plugins.Count();
-
-        // Zero plugins, it's probably not a plugin file, but some
-        // other kind of .dll we don't want to mess around with.
-        // erring on the side of caution, report this refusal to the user and exit.
-        if (pluginCount == 0)
-        {
-            context.SetResult(ErrorCodes.NoPluginsInFile,
-                $"{file.Name} does not appear to contain any plugins," +
-                " and cannot be verified as a valid plugin assembly." +
-                " You will have to delete this file manually.");
-            return false;
-        }
-
-        // One plugin = happy path.
-        // Most plugin files will contain a single plugin. No conf required.
-        if (pluginCount == 1)
-            return true;
-
-        // Multiple plugins. Ask the user to confirm, unless the "no confirm" flag is set in the command.
-        if (!command.NoConfirm && !await ConfirmRemoveMultiplePluginsAsync(file, context, cancel))
+        var pluginCount = plugins.Count;
+        Debug.Assert(pluginCount > 0, "pluginCount > 0");
+        if (!command.NoConfirm && !await ConfirmRemoveAsync(plugins, context, cancel))
         {
             context.SetResult(ErrorCodes.NotRemovedBecauseMultiplePlugins, "Cancelled.");
             return false;
         }
-
         // got confirmation
         return true;
     }
 
-    static async ValueTask<bool> ConfirmRemoveMultiplePluginsAsync(PluginFile file, InvocationContext context, CancellationToken cancel)
+    static async ValueTask<bool> ConfirmRemoveAsync(IReadOnlyList<PluginMetadata> plugins, InvocationContext context, CancellationToken cancel)
     {
         if (Console.IsInputRedirected)
             // tbd: Maybe write a message to stderr like "--no-confirm required when redirecting stdin and deleting a file w/multiple plugins"
             return false;
 
         // Render the warning/confirmation request
-        context.Console.Render(new MultiplePluginsWarningView(file));
+        context.Console.Render(new MultiplePluginsWarningView(plugins));
 
         // Get the user's yes/no response.
         var confirmed = await ConsoleUtil.WaitForConfirmationAsync(true, 100, cancel);

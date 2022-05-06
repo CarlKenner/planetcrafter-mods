@@ -4,6 +4,9 @@
     {
         #region Fields
 
+        const int AutoStringLen = -1;
+        const int AutoPatternLen = -1;
+
         public static readonly StringPatternMatcher Instance = new StringPatternMatcher();
 
         readonly Func<char, char, bool> _charComparer;
@@ -27,10 +30,18 @@
         /// </summary>
         /// <param name="str"></param>
         /// <param name="pattern"></param>
+        /// <returns></returns>
+        public bool IsMatch(string str, string pattern) => IsMatch(str, pattern, AutoStringLen);
+
+        /// <summary>
+        /// Matches input str with given wildcard pattern.
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="pattern"></param>
         /// <param name="stringLen"></param>
         /// <param name="patternLen"></param>
         /// <returns></returns>
-        public bool IsMatch(string str, string pattern, int stringLen = -1, int patternLen = -1)
+        public bool IsMatch(string str, string pattern, int stringLen, int patternLen = AutoPatternLen)
         {
             if (stringLen < 0)
                 stringLen = str.Length;
@@ -48,8 +59,8 @@
 
             // initailze lookup table to false
             for (var i = 0; i < stringLen + 1; i++)
-            for (var j = 0; j < patternLen + 1; j++)
-                lookup[i, j] = false;
+                for (var j = 0; j < patternLen + 1; j++)
+                    lookup[i, j] = false;
 
             // empty pattern can match with
             // empty string

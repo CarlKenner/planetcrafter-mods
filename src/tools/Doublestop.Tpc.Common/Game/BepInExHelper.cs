@@ -1,11 +1,13 @@
-﻿namespace Doublestop.Tpc.Game;
+﻿using Doublestop.Tpc.Plugins;
+
+namespace Doublestop.Tpc.Game;
 
 public sealed class BepInExHelper
 {
     #region Fields
 
-    public const string CoreDirectoryName = "core";
-    public const string PluginsDirectoryName = "plugins";
+    public const string CoreDirectoryBaseName = "core";
+    public const string PluginsDirectoryBaseName = "plugins";
 
     #endregion
 
@@ -49,13 +51,48 @@ public sealed class BepInExHelper
 
     #region Public Methods
 
-    public static BepInExHelper CreateDefault(string gameDirectory)
+    public static BepInExHelper Create(string gameDirectory)
     {
         var bepinexRoot = Path.Combine(gameDirectory, ThePlanetCrafter.BepInExDirectoryName);
         return new BepInExHelper(
-            Path.Combine(bepinexRoot, CoreDirectoryName),
-            Path.Combine(bepinexRoot, PluginsDirectoryName));
+            Path.Combine(bepinexRoot, CoreDirectoryBaseName),
+            Path.Combine(bepinexRoot, PluginsDirectoryBaseName));
     }
+
+    public IEnumerable<PluginAssembly> EnumerateAssemblies()
+    {
+        foreach (var file in PluginDlls)
+            if (GetAssemblyByPath(file) is { } assembly)
+                yield return assembly;
+    }
+
+    /// <summary>
+    /// Loads a plugin by file name, with or without the <c>.dll</c> extension.
+    /// </summary>
+    /// <param name="assemblyName"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <remarks>
+    /// If any path information is present in <see cref="assemblyName"/>, it will be ignored.
+    /// </remarks>
+    public PluginAssembly? GetAssembly(string assemblyName)
+    {
+        if (assemblyName == null) throw new ArgumentNullException(nameof(assemblyName));
+
+        // strip path info from the assembly name, just in case
+        assemblyName = Path.GetFileName(assemblyName);
+        return GetAssemblyByPath(Path.Combine(PluginsDirectory.FullName, assemblyName)) ??
+               GetAssemblyByPath(Path.Combine(PluginsDirectory.FullName, $"{assemblyName}.dll"));
+    }
+
+    #endregion
+
+    #region Private Methods
+
+    PluginAssembly? GetAssemblyByPath(string assemblyPath) =>
+        File.Exists(assemblyPath) 
+            ? new PluginAssembly(assemblyPath, CoreDlls) 
+            : null;
 
     #endregion
 }

@@ -1,9 +1,5 @@
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Doublestop.Tpc;
-using Doublestop.Tpc.Internal;
-using Doublestop.Tpc.Plugins;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -14,17 +10,16 @@ public sealed class PluginAssemblyLoadTests
 {
 
     [TestMethod]
-    public async Task Blah()
+    public void Test()
     {
         var config = TestUtil.GetTpcConfig();
         var game = new ThePlanetCrafter(config.GameDir!);
 
-        var pluginFile = await game.Plugins.GetFileByName("Doublestop.RotatedCompass.dll", CancellationToken.None);
-        pluginFile.Should().NotBeNull();
+        var assembly = game.Plugins.GetAssembly("Doublestop.RotatedCompass.dll");
+        assembly.Should().NotBeNull();
 
-        using var loadedAssembly = Reflect.LoadAssembly(pluginFile!.Path, game.BepInEx.CoreDlls);
-        var plugins = pluginFile.Plugins
-            .Select(info => new Plugin(info, pluginFile))
-            .ToList();
+        var plugins = assembly!.ToList();
+        plugins.Count.Should().Be(1);
+        plugins[0].Name.Should().Be("Doublestop's Rotated Compass");
     }
 }

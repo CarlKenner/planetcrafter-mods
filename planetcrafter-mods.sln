@@ -5,7 +5,8 @@ VisualStudioVersion = 17.1.32228.430
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{06D12D15-C7CE-4705-B190-76DCD71AF25B}"
 	ProjectSection(SolutionItems) = preProject
-		src\mods\build\plugin-build-props.targets = src\mods\build\plugin-build-props.targets
+		src\mods\build\plugin-build-common.targets = src\mods\build\plugin-build-common.targets
+		src\mods\build\plugin-post-build-autocopy.targets = src\mods\build\plugin-post-build-autocopy.targets
 		readme.md = readme.md
 	EndProjectSection
 EndProject

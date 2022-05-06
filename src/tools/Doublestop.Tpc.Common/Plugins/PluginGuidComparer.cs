@@ -1,26 +1,14 @@
-﻿namespace Doublestop.Tpc.Plugins;
+﻿using Doublestop.Tpc.Plugins.Metadata;
 
-internal sealed class PluginGuidComparer : StringComparer
+namespace Doublestop.Tpc.Internal;
+
+internal sealed class PluginGuidComparer : EqualityComparer<PluginGuid>
 {
-    #region Fields
-
     public static readonly PluginGuidComparer Instance = new();
 
-    #endregion
+    public override bool Equals(PluginGuid x, PluginGuid y) => 
+        NoCaseTrimmedStringComparer.Default.Equals(x.Value, y.Value);
 
-    #region Properties
-
-    static StringComparer InnerComparer => OrdinalIgnoreCase;
-
-    #endregion
-
-    #region Public Methods
-
-    public override int Compare(string? x, string? y) => InnerComparer.Compare(x?.Trim(), y?.Trim());
-
-    public override bool Equals(string? x, string? y) => InnerComparer.Equals(x?.Trim(), y?.Trim());
-
-    public override int GetHashCode(string obj) => InnerComparer.GetHashCode(obj.Trim());
-
-    #endregion
+    public override int GetHashCode(PluginGuid obj) => 
+        NoCaseTrimmedStringComparer.Default.GetHashCode(obj.Value);
 }

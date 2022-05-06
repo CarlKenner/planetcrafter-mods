@@ -1,50 +1,63 @@
 ﻿using System.Diagnostics;
+using Doublestop.Tpc.Plugins.Metadata;
 
 namespace Doublestop.Tpc.Plugins;
 
-[DebuggerDisplay("{Name} => {File}")]
+[DebuggerDisplay("{Name} => {Assembly}")]
 public sealed class Plugin : IEquatable<Plugin>
 {
     #region Constructors
 
-    public Plugin(PluginInfo info, PluginFile file, string? assetsDirectory = null)
+    public Plugin(PluginAssembly assembly, PluginMetadata metadata, string? assetsDirectoryName = null)
     {
-        Info = info ?? throw new ArgumentNullException(nameof(info));
-        File = file ?? throw new ArgumentNullException(nameof(file));
+        Assembly = assembly ?? throw new ArgumentNullException(nameof(assembly));
+        Metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
 
         // default asset dir is assembly filename without extension, eg "my-mod.dll" -> "my-mod/"
-        assetsDirectory ??= File.NameWithoutExtension;
+        assetsDirectoryName ??= Assembly.NameWithoutExtension;
         // if the given asset dir is relative, combine it with the the plugin assembly's containing directory.
-        if (!Path.IsPathRooted(assetsDirectory) && File.Directory is not null)
-            assetsDirectory = Path.Combine(File.Directory, assetsDirectory);
-        AssetsDirectory = new DirectoryInfo(assetsDirectory);
+        if (!Path.IsPathRooted(assetsDirectoryName) && Assembly.Directory is not null)
+            assetsDirectoryName = Path.Combine(Assembly.Directory, assetsDirectoryName);
+        AssetsDirectory = new DirectoryInfo(assetsDirectoryName);
     }
 
     #endregion
 
     #region Properties
 
-    public PluginInfo Info { get; }
+    /// <summary>
+    /// The plugin's containing assembly.
+    /// </summary>
+    public PluginAssembly Assembly { get; }
+
+    /// <summary>
+    /// The plugin's metadata (info, dependencies, etc)
+    /// </summary>
+    public PluginMetadata Metadata { get; }
 
     /// <summary>
     /// The plugin's unique id, as defined by the plugin author.
     /// </summary>
-    public string Guid => Info.Guid;
+    /// <remarks>
+    /// Convenience pass-through to <see cref="Metadata"/>.<see cref="PluginMetadata.Guid" />.
+    /// </remarks>
+    public PluginGuid Guid => Metadata.Guid;
 
     /// <summary>
     /// The plugin's name, as defined by the plugin author.
     /// </summary>
-    public string Name => Info.Name;
+    /// <remarks>
+    /// Convenience pass-through to <see cref="Metadata"/>.<see cref="PluginMetadata.Name" />.
+    /// </remarks>
+    public string Name => Metadata.Name;
 
     /// <summary>
     /// The plugin's version, as defined by the plugin author.
     /// </summary>
-    public string Version => Info.Version;
-
-    /// <summary>
-    /// The plugin's assembly file (.dll).
-    /// </summary>
-    public PluginFile File { get; }
+    /// <remarks>
+    /// Convenience pass-through to <see cref="Metadata"/>.<see cref="PluginMetadata.Version" />.
+    /// </remarks>
+    public string Version => Metadata.Version;
 
     /// <summary>
     /// The plugin's assets directory, which may or may not exist.
@@ -55,22 +68,17 @@ public sealed class Plugin : IEquatable<Plugin>
 
     #region Public Methods
 
+    public bool Equals(Plugin? other) =>
+        !ReferenceEquals(null, other) && 
+        (ReferenceEquals(this, other) ||
+         Metadata.Info.Equals(other.Metadata.Info) && Assembly.Equals(other.Assembly));
+
+    public override bool Equals(object? obj) => 
+        ReferenceEquals(this, obj) || 
+        obj is Plugin other && Equals(other);
+
+    public override int GetHashCode() => 
+        HashCode.Combine(Metadata.Info, Assembly);
+
     #endregion
-
-    public bool Equals(Plugin? other)
-    {
-        if (ReferenceEquals(null, other)) return false;
-        if (ReferenceEquals(this, other)) return true;
-        return Info.Equals(other.Info) && File.Equals(other.File);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        return ReferenceEquals(this, obj) || obj is Plugin other && Equals(other);
-    }
-
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(Info, File);
-    }
 }
