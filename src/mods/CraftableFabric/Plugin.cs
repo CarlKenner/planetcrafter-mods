@@ -13,9 +13,7 @@ namespace Doublestop.CraftableFabric
         const string PluginGuid = "Doublestop.CraftableFabric";
         const string PluginName = "Doublestop's Craftable Fabric";
         const string PluginVersion = "0.0.1";
-        static ManualLogSource _logger;
-
-        readonly Harmony _harmony = new Harmony(PluginGuid);
+        static Plugin _instance;
 
         #endregion
 
@@ -23,15 +21,16 @@ namespace Doublestop.CraftableFabric
 
         public Plugin()
         {
-            _logger = Logger;
+            _instance = this;
         }
 
         #endregion
 
         #region Properties
 
-        internal new static ManualLogSource Logger => _logger ?? 
-                                                      throw new InvalidOperationException("Logger not initialized.");
+
+        internal new ManualLogSource Logger => base.Logger;
+        internal static Plugin Instance => _instance ?? throw new InvalidOperationException("Not initialized.");
 
         #endregion
 
@@ -42,18 +41,13 @@ namespace Doublestop.CraftableFabric
             Logger.LogInfo("Plugin loaded. Initializing patch.");
             try
             {
-                _harmony.PatchAll(typeof(AddCraftableFabricPatch));
+                Harmony.CreateAndPatchAll(typeof(AddCraftableFabricPatch));
             }
             catch (Exception ex)
             {
                 Logger.LogError($"Patch failed to initialize because of an unhandled error: {ex}");
                 throw;
             }
-        }
-
-        void Destroy()
-        {
-            _harmony.UnpatchSelf();
         }
 
         #endregion
