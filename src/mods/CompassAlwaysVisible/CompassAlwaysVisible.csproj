@@ -1,12 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <!-- This is all that is needed to pull in the necessary basic dependencies. -->
   <Import Project="..\build\plugin-build-common.targets"></Import>
+  <Import Project="..\build\plugin-post-build-autocopy.targets"></Import>
 
   <PropertyGroup>
     <AssemblyName>Doublestop.CompassAlwaysVisible</AssemblyName>
     <RootNamespace>Doublestop.CompassAlwaysVisible</RootNamespace>
     <Version>0.0.2</Version>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="IllusionLibs.HoneySelect.Vectrosity" Version="2017.6.30.2" />
+  </ItemGroup>
 
   <!-- Additional dependencies are still handled the usual way on a per-project basis. -->
   <ItemGroup>

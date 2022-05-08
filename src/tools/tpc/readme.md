@@ -21,62 +21,76 @@ Absolutely no warranties or guarantees are offered or implied. Run this code at 
 
 Run `tpc -h` for a list of commands, or run `tpc <command> -h` for help with a particular command.
 
+## Quick note on search terms
+
+Some commands support search terms, explained here.
+
+Search terms...
+* support `*` and `?` wildcards, or regex (when `-e` is used). 
+* are (unless otherwise noted) matched against a plugin's name, filename, and guid. 
+  * eg, if plugin A's name matches a term, and plugin B's guid matches the same term, both plugins are included in the search results.
+* are not case-sensitive.
+  * ie, `*plugin*` and `*PLUGIN*` are equivalent.
+  * also true for regular expressions. `^PLUGIN` and `^plugin` are equivalent.
+
+### Substring vs exact matching
+
+Like `dir` on the command line, search terms are matched exactly (ie, a==b)
+unless a search term begins or ends with a wildcard.
+
+This behavior changes when using a command's `-e` flag, which treats search
+terms as regular expressions. Regular expressions naturally match any part
+of the string unless the regex pattern includes start/end terminator checks.
+
+Please be aware of this difference when using regular expressions, particularly with the `remove` command.
+
 ## ls
 
-Lists currently installed plugins and their metadata, including each plugin's `guid` (needed by the `remove` command).
+Lists currently installed plugins along with metadata and file information. Similar to `dir` and `ls` console commands.
 
 Supports multiple output formats: table summary (default), detailed list, names-only, filenames-only.
 
-Supports wildcard and regex searching (looking ahead to the days we all have dozens of plugins installed). 
-Search terms are matched against the plugin's name, filename, and guid. 
+### Examples
 
-### Show all plugins
+#### Show all plugins
 
 `tpc ls`
 
-### Show all plugins as a detailed list
+#### Show all plugins as a detailed list
 
 `tpc ls -od`
 
-### Show all plugins, filenames only
+#### Show all plugins, filenames only
 
 `tpc ls -of`
 
-### Show all plugins containing the word 'buffalo'
+#### Show all plugins containing the word 'buffalo'
 
 `tpc ls *buffalo*`
 
-Note that substring searching will require wildcards before and/or after the substring to search.
-Otherwise, search terms will be matched exactly (ie term==value).
-
-* `buffalo*`  - prefix match
-* `*buffalo`  - suffix match
-* `*buffalo*` - substring match
-* `buffalo`   - exact match
-
-Note: Search terms are not case-sensitive.
 
 ## add
+
 Adds a plugin to The Planet Crafter by copying the plugin's BepInEx plugin assembly (eg, `Doublestop.RotatedCompass.dll`)
 to the game's `BepInEx\plugins` subdirectory. 
 
-Currently, this command supports two installation sources, with more in progress.
+Currently, this command supports two installation sources, with a couple more in progress.
 
 1. Add a plugin's assembly file directly.
 
-    tpc add c:\projects\Doublestop.RotatedCompass\bin\Debug\net462\Doublestop.RotatedCompass.dll
+    `tpc add c:\projects\Doublestop.RotatedCompass\bin\Debug\net462\Doublestop.RotatedCompass.dll`
 
 2. Add a plugin contained in a directory.
 
-    tpc add c:\downloads\Doublestop.RotatedCompass-0.0.1\
+    `tpc add c:\downloads\Doublestop.RotatedCompass-0.0.1\`
 
 3. (TBD) Add a plugin from a downloaded zip file.
 
-    tpc add c:\downloads\Doublestop.RotatedCompass-0.0.1.zip
+    eg, `tpc add c:\downloads\Doublestop.RotatedCompass-0.0.1.zip`
 
 4. (TBD) Add a plugin from a url.
 
-    tpc add https://github.com/doublestop/planetcrafter-mods/releases/download/RotatedCompass_v0.0.1/Doublestop.RotatedCompass-0.0.1.zip
+    eg,  `tpc add https://github.com/doublestop/planetcrafter-mods/releases/download/RotatedCompass_v0.0.1/Doublestop.RotatedCompass-0.0.1.zip`
 
 
 When installing from a directory (option #2 above), it is required that only one `.dll` file exists in that directory.
@@ -97,25 +111,17 @@ Note: This limitation will eventually be removed, and `tpc` will eventually supp
 
 ## remove
 
-Removes (uninstalls) a plugin, given the plugin's `guid`. The plugin's assembly (`.dll`) is located by
-matching its declared guid with the guid passed on the command line. If found, the `.dll` is
-deleted from the system. 
+Removes one or more plugins using a search pattern. See the `ls` command for search behavior.
 
-Example:
-* Doublestop.RotatedCompass.dll
-* `[BepInPlugin(guid="Doublestop.RotatedCompass", name="Rotated Compass", version="0.0.1")]`
-
-`tpc remove Doublestop.RotatedCompass`
-
-Note: Guids are not case-sensitive.
-
-`tpc remove doublestop.rotatedcompass` is fine, too.
+User confirmation is required before any files are removed. Confirmation can be skipped by 
+including the `-f` switch after the `remove` command, eg `tpc remove -f someplugin`
 
 # Installation
 
-At this time, `tpc` does not have an installer. The project must be downloaded and built locally.
+At this time, `tpc` does not have an installer or a release cycle. The project must be downloaded and built locally.
 
 ## Building from Source
+* Unlike plugins, which are currently limited to targeting .NET 4.6.2, this project targets .NET 6.0.
 * Make sure you have installed the [.NET 6.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0).
 * Grab the source, build.
   * Open `planetcrafter-mods.sln` in Visual Studio, build in the IDE; or,
@@ -136,6 +142,8 @@ If you clone this repository, please disconnect from the remote. I will not be a
 * Open `tpc.cfg` in wordpad, then add the following line:
   * `game_dir = <path\to\Steam>\steamapps\common\The Planet Crafter`
   * Replace `<path\to\Steam>` with the path to your local Steam install, probably `C:\Program Files (x86)\Steam`.
+  * If you skip this step, `tpc` will attempt to discover the game's directory
+    by looking it up in your local Steam library.
 * Create a batch file, or add `planetcrafter-mods/src/tools/tpc/bin/Debug/net6.0` to your `PATH`.
 * Yeah... Anyway, here's a batch file.
 ```

@@ -1,18 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\build\plugin-build-common.targets"></Import>
+  <Import Project="..\build\plugin-post-build-autocopy.targets"></Import>
   
   <PropertyGroup>
-    <AssemblyName>Doublestop.RotatedCompass</AssemblyName>
-    <RootNamespace>Doublestop.RotatedCompass</RootNamespace>
-    <Version>0.0.2</Version>
-
-    <!-- 
-    This plugin is obsolete, as TPC fixed the compass orientation in 0.4.009. 
-    So, disable the CopyDlls post build target. 
-    -->
-    <NoCopyDlls>true</NoCopyDlls>
+    <AssemblyName>Doublestop.CraftableFabric</AssemblyName>
+    <RootNamespace>Doublestop.CraftableFabric</RootNamespace>
+    <Version>0.0.1</Version>
   </PropertyGroup>
-
+  
   <!-- Additional dependencies are still handled the usual way on a per-project basis. -->
   <ItemGroup>
     <Reference Include="UnityEngine.UI">
