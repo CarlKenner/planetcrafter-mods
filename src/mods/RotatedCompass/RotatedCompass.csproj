@@ -11,6 +11,7 @@
     So, disable the CopyDlls post build target. 
     -->
     <NoCopyDlls>true</NoCopyDlls>
+    <TargetFramework>net461</TargetFramework>
   </PropertyGroup>
 
   <!-- Additional dependencies are still handled the usual way on a per-project basis. -->
