@@ -6,7 +6,8 @@
     <AssemblyName>Doublestop.CompassAlwaysVisible</AssemblyName>
     <RootNamespace>Doublestop.CompassAlwaysVisible</RootNamespace>
     <Version>0.0.2</Version>
-    <TargetFramework>net461</TargetFramework>
+	<NoCopyDlls>true</NoCopyDlls>
+	<TargetFramework>net461</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>

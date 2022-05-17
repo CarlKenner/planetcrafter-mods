@@ -6,7 +6,8 @@
     <AssemblyName>Doublestop.CraftableFabric</AssemblyName>
     <RootNamespace>Doublestop.CraftableFabric</RootNamespace>
     <Version>0.0.1</Version>
-    <TargetFramework>net461</TargetFramework>
+    <NoCopyDlls>true</NoCopyDlls>
+	<TargetFramework>net461</TargetFramework>
   </PropertyGroup>
   
   <!-- Additional dependencies are still handled the usual way on a per-project basis. -->

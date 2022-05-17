@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\build\plugin-build-common.targets"></Import>
+  <Import Project="..\build\plugin-post-build-autocopy.targets"></Import>
+
+	<PropertyGroup>
+    <AssemblyName>CarlKenner.FixUnits</AssemblyName>
+    <RootNamespace>CarlKenner.FixUnits</RootNamespace>
+    <Version>0.0.1</Version>
+
+    <TargetFramework>net461</TargetFramework>
+  </PropertyGroup>
+
+  <!-- Additional dependencies are still handled the usual way on a per-project basis. -->
+  <ItemGroup>
+	  <PackageReference Include="UnityEngine.Modules" Version="2020.3.26.7510196" IncludeAssets="compile" />
+	  <Reference Include="UnityEngine.UI">
+        <SpecificVersion>False</SpecificVersion>
+        <HintPath>$(GameManaged)unityengine.ui.dll</HintPath>
+		<Private>False</Private>
+      </Reference>
+	  <Reference Include="Unity.TextMeshPro">
+		  <SpecificVersion>False</SpecificVersion>
+		  <HintPath>$(GameManaged)Unity.TextMeshPro.dll</HintPath>
+		  <Private>False</Private>
+	  </Reference>
+  </ItemGroup>
+</Project>
