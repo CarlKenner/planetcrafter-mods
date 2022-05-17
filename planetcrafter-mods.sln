@@ -10,7 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{06D12D15-C
 		readme.md = readme.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RotatedCompass", "src\mods\RotatedCompass\RotatedCompass.csproj", "{4D215134-93E3-48B5-A4C7-8B5AE5F5801C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FixUnits", "src\mods\RotatedCompass\FixUnits.csproj", "{4D215134-93E3-48B5-A4C7-8B5AE5F5801C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{0F7EA0C6-02F2-496C-BBBD-38201E822CFE}"
 EndProject
