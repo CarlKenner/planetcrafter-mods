@@ -126,7 +126,7 @@ namespace CarlKenner.FixUnits
             {
                 if (energyGroupData.generation <= 0f)
                 {
-                    UnityEngine.Object.Instantiate<GameObject>(__instance.groupLineGameObject, __instance.listGridConsumption.transform).GetComponent<EnergyGroupLine>().SetValues(energyGroupData.group, energyGroupData.number, unit.GetDisplayStringForValue(energyGroupData.generation, false, -1));
+                    UnityEngine.Object.Instantiate<GameObject>(__instance.groupLineGameObject, __instance.listGridConsumption.transform).GetComponent<UiGroupLine>().SetValues(energyGroupData.group, energyGroupData.number, unit.GetDisplayStringForValue(energyGroupData.generation, false, -1));
                 }
             }
             ___energyGroupsData = (from o in ___energyGroupsData
@@ -136,7 +136,7 @@ namespace CarlKenner.FixUnits
             {
                 if (energyGroupData2.generation >= 0f)
                 {
-                    UnityEngine.Object.Instantiate<GameObject>(__instance.groupLineGameObject, __instance.listGridProduction.transform).GetComponent<EnergyGroupLine>().SetValues(energyGroupData2.group, energyGroupData2.number, unit.GetDisplayStringForValue(energyGroupData2.generation, false, -1));
+                    UnityEngine.Object.Instantiate<GameObject>(__instance.groupLineGameObject, __instance.listGridProduction.transform).GetComponent<UiGroupLine>().SetValues(energyGroupData2.group, energyGroupData2.number, unit.GetDisplayStringForValue(energyGroupData2.generation, false, -1));
                 }
             }
             return false;
