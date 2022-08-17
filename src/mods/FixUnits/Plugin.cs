@@ -22,7 +22,7 @@ namespace CarlKenner.FixUnits
         const string PluginName = "CarlKenner.FixUnits";
 
         // Make sure the project's <Version/> attr is in sync with PluginVersion
-        const string PluginVersion = "0.0.1";
+        const string PluginVersion = "0.0.2";
 
 		static Collider lastNonWaterCollider = null;
 
